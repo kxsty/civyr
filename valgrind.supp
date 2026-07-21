@@ -1,0 +1,26 @@
+{
+   libvips tracked malloc
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:vips_tracked_malloc
+   obj:/usr/lib/x86_64-linux-gnu/libvips.so.*
+}
+{
+   libglycin loader leak
+   Memcheck:Leak
+   match-leak-kinds: possible
+   obj:/usr/lib/x86_64-linux-gnu/libglycin-2.so.*
+}
+{
+   fontconfig leak
+   Memcheck:Leak
+   match-leak-kinds: definite
+   obj:/usr/lib/x86_64-linux-gnu/libfontconfig.so.*
+}
+{
+   pango context leak
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:pango_context_get_metrics
+   obj:/usr/lib/x86_64-linux-gnu/libpango-1.0.so.*
+}

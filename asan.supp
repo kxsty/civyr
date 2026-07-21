@@ -1,0 +1,12 @@
+leak:libfontconfig
+leak:libpango
+leak:libgtk
+leak:libglib
+
+leak:_glfwInitEGL
+
+leak:pango_context_get_metrics
+leak:gtk_widget_get_preferred_width
+leak:gtk_widget_get_preferred_height
+
+leak:libdecor_frame_commit
