@@ -35,7 +35,7 @@ static bool win32_is_dark_mode()
     return value == 0;
 }
 
-static bool win32_adapt_dark_mode(GLFWwindow* win)
+static bool win32_adapt_dark_mode(GLFWwindow *win)
 {
     if (!win32_is_dark_mode())
         return true;
@@ -55,9 +55,9 @@ static bool win32_adapt_dark_mode(GLFWwindow* win)
 #define DEF_WIDTH 800
 #define DEF_HEIGHT 600
 
-static void framebuffer_size_callback(GLFWwindow* const window, int const width, int const height)
+static void framebuffer_size_callback(GLFWwindow *const window, int const width, int const height)
 {
-    App* const app = glfwGetWindowUserPointer(window);
+    App *const app = glfwGetWindowUserPointer(window);
 
     if (width <= 0 || height <= 0)
         return;
@@ -80,9 +80,9 @@ static void framebuffer_size_callback(GLFWwindow* const window, int const width,
     app_render_image(app);
 }
 
-static void scroll_callback(GLFWwindow* const window, [[maybe_unused]] double const xoffset, double const yoffset)
+static void scroll_callback(GLFWwindow *const window, [[maybe_unused]] double const xoffset, double const yoffset)
 {
-    App* const app = glfwGetWindowUserPointer(window);
+    App *const app = glfwGetWindowUserPointer(window);
     if (app->img.state < IMAGE_STATE_UPLOADED)
         return;
 
@@ -92,10 +92,10 @@ static void scroll_callback(GLFWwindow* const window, [[maybe_unused]] double co
     app_zoom_image(app, yoffset > 0);
 }
 
-static void mouse_button_callback(GLFWwindow* const window, int const button, int const action,
+static void mouse_button_callback(GLFWwindow *const window, int const button, int const action,
                                   [[maybe_unused]] int const mods)
 {
-    App* const app = glfwGetWindowUserPointer(window);
+    App *const app = glfwGetWindowUserPointer(window);
     if (app->img.state < IMAGE_STATE_UPLOADED)
         return;
 
@@ -118,9 +118,9 @@ static void mouse_button_callback(GLFWwindow* const window, int const button, in
     }
 }
 
-static void cursor_position_callback(GLFWwindow* const window, double const xpos, double const ypos)
+static void cursor_position_callback(GLFWwindow *const window, double const xpos, double const ypos)
 {
-    App* const app = glfwGetWindowUserPointer(window);
+    App *const app = glfwGetWindowUserPointer(window);
     if (app->img.state < IMAGE_STATE_UPLOADED)
         return;
 
@@ -142,13 +142,13 @@ static void cursor_position_callback(GLFWwindow* const window, double const xpos
     LOG(LOG_TRACE, "camera:{x:%f,y:%f}", app->ren.camera.x, app->ren.camera.y);
 }
 
-static void key_callback(GLFWwindow* const window, int const key, [[maybe_unused]] int const scancode, int const action,
+static void key_callback(GLFWwindow *const window, int const key, [[maybe_unused]] int const scancode, int const action,
                          [[maybe_unused]] int const mods)
 {
     if (action == GLFW_RELEASE)
         return;
 
-    App* const app = glfwGetWindowUserPointer(window);
+    App *const app = glfwGetWindowUserPointer(window);
 
     switch (key)
     {
@@ -160,27 +160,26 @@ static void key_callback(GLFWwindow* const window, int const key, [[maybe_unused
         if (app->img.state >= IMAGE_STATE_UPLOADED)
             app_rotate_image(app, false);
         break;
-    case GLFW_KEY_F11:
+    case GLFW_KEY_F11: {
+        static int prev_x, prev_y, prev_w, prev_h;
+        if (!app->win.is_fullscreen)
         {
-            static int prev_x, prev_y, prev_w, prev_h;
-            if (!app->win.is_fullscreen)
-            {
-                GLFWmonitor* const monitor = glfwGetPrimaryMonitor();
-                GLFWvidmode const* const mode = glfwGetVideoMode(monitor);
-                glfwGetWindowPos(window, &prev_x, &prev_y);
-                glfwGetWindowSize(window, &prev_w, &prev_h);
-                glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-            }
-            else
-            {
-                glfwSetWindowMonitor(window, nullptr, prev_x, prev_y, prev_w, prev_h, GLFW_DONT_CARE);
-            }
-
-            app->win.is_fullscreen = !app->win.is_fullscreen;
-            app->img.rerender = true;
-
-            break;
+            GLFWmonitor *const monitor = glfwGetPrimaryMonitor();
+            GLFWvidmode const *const mode = glfwGetVideoMode(monitor);
+            glfwGetWindowPos(window, &prev_x, &prev_y);
+            glfwGetWindowSize(window, &prev_w, &prev_h);
+            glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
         }
+        else
+        {
+            glfwSetWindowMonitor(window, nullptr, prev_x, prev_y, prev_w, prev_h, GLFW_DONT_CARE);
+        }
+
+        app->win.is_fullscreen = !app->win.is_fullscreen;
+        app->img.rerender = true;
+
+        break;
+    }
     case GLFW_KEY_I:
         if (app->img.state >= IMAGE_STATE_UPLOADED)
         {
@@ -192,13 +191,13 @@ static void key_callback(GLFWwindow* const window, int const key, [[maybe_unused
     }
 }
 
-static void drop_callback(GLFWwindow* window, int const path_count, char const* paths[])
+static void drop_callback(GLFWwindow *window, int const path_count, char const *paths[])
 {
     if (path_count < 1)
         return;
 
-    App* const app = glfwGetWindowUserPointer(window);
-    char const* path = paths[0];
+    App *const app = glfwGetWindowUserPointer(window);
+    char const *path = paths[0];
 
     if (strcmp(path, app->img.path) == 0)
         return;
@@ -214,7 +213,7 @@ static void drop_callback(GLFWwindow* window, int const path_count, char const* 
     glfwPostEmptyEvent();
 }
 
-static GLFWwindow* base_window_create(char const* const title)
+static GLFWwindow *base_window_create(char const *const title)
 {
     LOG(LOG_TRACE, "Setting window hints");
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -223,10 +222,10 @@ static GLFWwindow* base_window_create(char const* const title)
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
     LOG(LOG_TRACE, "Creating glfw window");
-    GLFWwindow* self = glfwCreateWindow(DEF_WIDTH, DEF_HEIGHT, title, nullptr, nullptr);
+    GLFWwindow *self = glfwCreateWindow(DEF_WIDTH, DEF_HEIGHT, title, nullptr, nullptr);
     if (!self)
     {
-        char const* err;
+        char const *err;
         glfwGetError(&err);
         fprintf(stderr, "%s\n", err);
         return nullptr;
@@ -240,7 +239,7 @@ static GLFWwindow* base_window_create(char const* const title)
     return self;
 }
 
-static void base_window_initialize(GLFWwindow* const self)
+static void base_window_initialize(GLFWwindow *const self)
 {
     LOG(LOG_TRACE, "Setting window limits");
     glfwSetWindowSizeLimits(self, 160, 120, GLFW_DONT_CARE, GLFW_DONT_CARE);
@@ -255,7 +254,7 @@ static void base_window_initialize(GLFWwindow* const self)
     glfwSetDropCallback(self, drop_callback);
 }
 
-static bool base_window_and_renderer_create(char const* const title, GLFWwindow** out_self, Renderer* out_ren)
+static bool base_window_and_renderer_create(char const *const title, GLFWwindow **out_self, Renderer *out_ren)
 {
     *out_self = base_window_create(title);
     if (!*out_self)
@@ -278,28 +277,27 @@ static bool base_window_and_renderer_create(char const* const title, GLFWwindow*
     return true;
 }
 
-static void window_create(Window* self, GLFWwindow* const base, int const width, int const height)
+static void window_create(Window *self, GLFWwindow *const base, int const width, int const height)
 {
     *self = (Window){
         .base = base,
-
         .mouse =
-        {
-            .x = -1,
-            .y = -1,
-            .is_dragging = false,
-        },
+            {
+                .x = -1,
+                .y = -1,
+                .is_dragging = false,
+            },
         .width = width,
         .height = height,
         .is_fullscreen = false,
     };
 }
 
-bool window_and_renderer_create(Window* const self, Renderer* const ren, char const* const title)
+bool window_and_renderer_create(Window *const self, Renderer *const ren, char const *const title)
 {
     assert(self && ren);
 
-    GLFWwindow* base;
+    GLFWwindow *base;
     bool const res = base_window_and_renderer_create(title, &base, ren);
     if (!res)
         return false;
@@ -309,41 +307,42 @@ bool window_and_renderer_create(Window* const self, Renderer* const ren, char co
     return true;
 }
 
-void window_destroy(Window const* self)
+void window_destroy(Window const *self)
 {
-    assert(self);
+    window_assert(self);
 
     if (self->base)
         glfwDestroyWindow(self->base);
 }
 
-void window_rename(Window const* self, char const* const title)
+void window_rename(Window const *self, char const *const title)
 {
-    assert(self);
+    window_assert(self);
 
     glfwSetWindowTitle(self->base, title);
 }
 
-void window_transform(Window const* self, int const x, int const y, unsigned const width, unsigned const height)
+void window_transform(Window const *self, int const x, int const y, unsigned const width, unsigned const height)
 {
-    assert(self);
+    window_assert(self);
 
     glfwSetWindowPos(self->base, x, y);
     glfwSetWindowSize(self->base, (int)width, (int)height);
 }
 
-void window_workarea(Window const* self, int* x, int* y, unsigned* width, unsigned* height)
+void window_workarea(Window const *self, int *x, int *y, unsigned *width, unsigned *height)
 {
-    assert(self && x && y && width && height);
+    window_assert(self);
+    assert(x && y && width && height);
 
     int wx, wr, ww, wh;
     glfwGetWindowPos(self->base, &wx, &wr);
     glfwGetWindowSize(self->base, &ww, &wh);
 
     int count;
-    GLFWmonitor** monitors = glfwGetMonitors(&count);
+    GLFWmonitor **monitors = glfwGetMonitors(&count);
 
-    GLFWmonitor* best_monitor = nullptr;
+    GLFWmonitor *best_monitor = nullptr;
     int best_overlap = 0;
 
     for (int i = 0; i < count; i++)
@@ -351,10 +350,10 @@ void window_workarea(Window const* self, int* x, int* y, unsigned* width, unsign
         int mx, my;
         glfwGetMonitorPos(monitors[i], &mx, &my);
 
-        GLFWvidmode const* mode = glfwGetVideoMode(monitors[i]);
+        GLFWvidmode const *mode = glfwGetVideoMode(monitors[i]);
 
         int const overlap = __max(0, __min(wx + ww, mx + mode->width) - __max(wx, mx)) *
-            __max(0, __min(wr + wh, my + mode->height) - __max(wr, my));
+                            __max(0, __min(wr + wh, my + mode->height) - __max(wr, my));
 
         if (overlap > best_overlap)
         {
@@ -363,5 +362,5 @@ void window_workarea(Window const* self, int* x, int* y, unsigned* width, unsign
         }
     }
 
-    glfwGetMonitorWorkarea(best_monitor, x, y, (int*)width, (int*)height);
+    glfwGetMonitorWorkarea(best_monitor, x, y, (int *)width, (int *)height);
 }

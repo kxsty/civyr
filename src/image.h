@@ -118,7 +118,6 @@ void image_file_get_size(char const *path, int *width, int *height);
     {                                                                                                                  \
         assert((self) != nullptr);                                                                                     \
         assert((self)->state == IMAGE_STATE_UNLOADED);                                                                 \
-        assert((self)->path != nullptr);                                                                               \
         assert((self)->width == 0);                                                                                    \
         assert((self)->height == 0);                                                                                   \
         assert((self)->channels == 0);                                                                                 \
@@ -133,7 +132,6 @@ void image_file_get_size(char const *path, int *width, int *height);
     {                                                                                                                  \
         assert((self) != nullptr);                                                                                     \
         assert((self)->state == IMAGE_STATE_LOADED);                                                                   \
-        assert((self)->path != nullptr);                                                                               \
         assert((self)->width > 0);                                                                                     \
         assert((self)->height > 0);                                                                                    \
         assert((self)->channels > 0);                                                                                  \
@@ -148,7 +146,6 @@ void image_file_get_size(char const *path, int *width, int *height);
     {                                                                                                                  \
         assert((self) != nullptr);                                                                                     \
         assert((self)->state == IMAGE_STATE_UPLOADED);                                                                 \
-        assert((self)->path != nullptr);                                                                               \
         assert((self)->width > 0);                                                                                     \
         assert((self)->height > 0);                                                                                    \
         assert((self)->channels > 0);                                                                                  \

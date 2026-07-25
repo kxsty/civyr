@@ -33,6 +33,7 @@ endif ()
 if (WIN32)
     add_executable(civyr WIN32
             main.c
+            ../app.rc
     )
 else ()
     add_executable(civyr
@@ -42,31 +43,31 @@ endif ()
 
 target_link_libraries(civyr PRIVATE civyr_lib)
 
-if(POLICY CMP0207)
+if (POLICY CMP0207)
     cmake_policy(SET CMP0207 NEW)
-endif()
+endif ()
 
 install(TARGETS civyr
         RUNTIME_DEPENDENCIES
         DIRECTORIES
-            ${VIPS_LIBRARY_DIRS}
-            ${VIPS_LIBDIR}
-            "${VIPS_LIBDIR}/../bin"
+        ${VIPS_LIBRARY_DIRS}
+        ${VIPS_LIBDIR}
+        "${VIPS_LIBDIR}/../bin"
 
         PRE_EXCLUDE_REGEXES
-            "^api-ms-.*"
-            "^ext-ms-.*"
-            "^AzureAttest.*"
-            "[/\\\\]HvsiFileTrust\\.dll$"
-            "[/\\\\]PdmUtilities\\.dll$"
-            "[/\\\\]wpaxholder\\.dll$"
-            "[/\\\\]d3d9\\.dll$"
-            "[/\\\\]dxgi\\.dll$"
-            "[/\\\\]bcryptprimitives\\.dll$"
-            "[/\\\\]ntdll\\.dll$"
+        "^api-ms-.*"
+        "^ext-ms-.*"
+        "^AzureAttest.*"
+        "[/\\\\]HvsiFileTrust\\.dll$"
+        "[/\\\\]PdmUtilities\\.dll$"
+        "[/\\\\]wpaxholder\\.dll$"
+        "[/\\\\]d3d9\\.dll$"
+        "[/\\\\]dxgi\\.dll$"
+        "[/\\\\]bcryptprimitives\\.dll$"
+        "[/\\\\]ntdll\\.dll$"
 
         POST_EXCLUDE_REGEXES
-            "^.:/[Ww][Ii][Nn][Dd][Oo][Ww][Ss]/.*"
+        "^.:/[Ww][Ii][Nn][Dd][Oo][Ww][Ss]/.*"
 
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib

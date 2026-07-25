@@ -31,7 +31,7 @@ void app_upload_image(App *self);
 #define app_assert(self)                                                                                               \
     do                                                                                                                 \
     {                                                                                                                  \
-        assert(self);                                                                                                  \
+        assert((self) != nullptr);                                                                                     \
         window_assert(&(self)->win);                                                                                   \
         image_assert(&(self)->img);                                                                                    \
         renderer_assert(&(self)->ren);                                                                                 \

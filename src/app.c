@@ -44,7 +44,7 @@ static void update_animation(AnimatedImage *const anim)
     }
 }
 
-static void extent_rotate(int *const width, int *const height, double const angle)
+static void extent_rotate(unsigned *const width, unsigned *const height, double const angle)
 {
     switch ((int)angle)
     {
@@ -53,7 +53,7 @@ static void extent_rotate(int *const width, int *const height, double const angl
         break;
     case 90:
     case 270: {
-        int const tmp = *width;
+        unsigned const tmp = *width;
         *width = *height;
         *height = tmp;
         break;
@@ -149,7 +149,7 @@ void app_center_image(App *const self)
     if (self->img.state < IMAGE_STATE_UPLOADED)
         return;
 
-    int width = self->img.width, height = self->img.height;
+    unsigned width = self->img.width, height = self->img.height;
     extent_rotate(&width, &height, self->ren.camera.angle);
 
     self->ren.camera.zoom = fmin((double)self->win.width / width, (double)self->win.height / height);

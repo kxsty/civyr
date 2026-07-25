@@ -54,7 +54,6 @@ static char const *path_basename(char const *const path)
     return basename;
 }
 
-
 #define panic(fmt, ...)                                                                                                \
     do                                                                                                                 \
     {                                                                                                                  \
