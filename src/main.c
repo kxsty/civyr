@@ -20,12 +20,7 @@ static char *bind_path(int const argc, char *const argv[])
 int main(int const argc, char *const argv[])
 {
     LOG(LOG_TRACE, "Binding image path");
-    char *path = bind_path(argc, argv);
-    if (!path)
-    {
-        fprintf(stderr, "Image path is required\n");
-        exit(2);
-    }
+    char const *const path = bind_path(argc, argv);
 
     App app;
     LOG(LOG_TRACE, "Creating an app");

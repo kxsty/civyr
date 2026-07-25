@@ -7,7 +7,7 @@
 
 #include "app.h"
 
-static void calc_window_rect(Window const* const win, int* x, int* y, unsigned* const width, unsigned* const height)
+static void calc_window_rect(Window const *const win, int *x, int *y, unsigned *const width, unsigned *const height)
 {
     int wx, wy;
     unsigned ww, wh;
@@ -25,7 +25,7 @@ static void calc_window_rect(Window const* const win, int* x, int* y, unsigned* 
     *y = (int)(wy + (wh - *height) / 2);
 }
 
-static void update_animation(AnimatedImage* const anim)
+static void update_animation(AnimatedImage *const anim)
 {
     long long const now_ms = time_now_ms();
 
@@ -44,7 +44,7 @@ static void update_animation(AnimatedImage* const anim)
     }
 }
 
-static void extent_rotate(int* const width, int* const height, double const angle)
+static void extent_rotate(int *const width, int *const height, double const angle)
 {
     switch ((int)angle)
     {
@@ -52,19 +52,18 @@ static void extent_rotate(int* const width, int* const height, double const angl
     case 180:
         break;
     case 90:
-    case 270:
-        {
-            int const tmp = *width;
-            *width = *height;
-            *height = tmp;
-            break;
-        }
+    case 270: {
+        int const tmp = *width;
+        *width = *height;
+        *height = tmp;
+        break;
+    }
     default:
         panic("Unsupported angle");
     }
 }
 
-void app_create(App* const self, char const* argv0, char const* image_path)
+void app_create(App *const self, char const *argv0, char const *image_path)
 {
     LOG(LOG_TRACE, "Inititalizing vips");
     if (VIPS_INIT(argv0) != 0)
@@ -72,26 +71,37 @@ void app_create(App* const self, char const* argv0, char const* image_path)
 
     vips_cache_set_max(0);
 
-    LOG(LOG_TRACE, "Starting image loading");
-    image_create(&self->img, image_path);
-    image_load_detached(&self->img);
+    char const *win_title;
+    if (image_path)
+    {
+        LOG(LOG_TRACE, "Starting image loading");
+        image_create(&self->img, image_path);
+        image_load_detached(&self->img);
+
+        win_title = path_basename(image_path);
+    }
+    else
+    {
+        image_create(&self->img, "");
+        win_title = "civyr";
+    }
 
     LOG(LOG_TRACE, "Initializing glfw");
     if (!glfwInit())
     {
-        char const* err;
+        char const *err;
         glfwGetError(&err);
         panic("glfw initalization failed: %s", err);
     }
 
     LOG(LOG_TRACE, "Creating window and renderer");
-    if (!window_and_renderer_create(&self->win, &self->ren, path_basename(image_path)))
+    if (!window_and_renderer_create(&self->win, &self->ren, win_title))
         abort();
 
     glfwSetWindowUserPointer(self->win.base, self);
 }
 
-void app_destroy(App* const self)
+void app_destroy(App *const self)
 {
     app_assert(self);
 
@@ -103,7 +113,7 @@ void app_destroy(App* const self)
     glfwTerminate();
 }
 
-void app_render_bg(App const* self)
+void app_render_bg(App const *self)
 {
     app_assert(self);
 
@@ -111,7 +121,7 @@ void app_render_bg(App const* self)
     renderer_present(&self->ren);
 }
 
-void app_render_image(App* const self)
+void app_render_image(App *const self)
 {
     app_assert(self);
 
@@ -132,7 +142,7 @@ void app_render_image(App* const self)
     self->img.rerender = false;
 }
 
-void app_center_image(App* const self)
+void app_center_image(App *const self)
 {
     app_assert(self);
     image_assert_uploaded(&self->img);
@@ -152,7 +162,7 @@ void app_center_image(App* const self)
     self->img.recenter = false;
 }
 
-static void app_window_rename(App const* const self)
+static void app_window_rename(App const *const self)
 {
     char title[512];
     snprintf(title, sizeof(title), "%s - %i x %i", path_basename(self->img.path), self->img.width, self->img.height);
@@ -160,7 +170,7 @@ static void app_window_rename(App const* const self)
     window_rename(&self->win, title);
 }
 
-void app_upload_image(App* const self)
+void app_upload_image(App *const self)
 {
     app_assert(self);
     image_assert_loaded(&self->img);
@@ -177,7 +187,7 @@ void app_upload_image(App* const self)
     image_assert_uploaded(&self->img);
 }
 
-void app_zoom_image(App* const self, bool const inward)
+void app_zoom_image(App *const self, bool const inward)
 {
     app_assert(self);
 
@@ -205,7 +215,7 @@ void app_zoom_image(App* const self, bool const inward)
     self->img.rerender = true;
 }
 
-void app_move_image(App* const self, double const x_offset, double const y_offset)
+void app_move_image(App *const self, double const x_offset, double const y_offset)
 {
     app_assert(self);
 
@@ -215,7 +225,7 @@ void app_move_image(App* const self, double const x_offset, double const y_offse
     self->img.rerender = true;
 }
 
-void app_rotate_image(App* const self, bool const clockwise)
+void app_rotate_image(App *const self, bool const clockwise)
 {
     app_assert(self);
 
