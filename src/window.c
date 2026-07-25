@@ -176,7 +176,8 @@ static void key_callback(GLFWwindow *const window, int const key, [[maybe_unused
         }
 
         app->win.is_fullscreen = !app->win.is_fullscreen;
-        app->img.rerender = true;
+        if (app->img.state >= IMAGE_STATE_UPLOADED)
+            app->img.rerender = true;
 
         break;
     }
