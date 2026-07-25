@@ -57,8 +57,8 @@ int main(int const argc, char *const argv[])
         if (image_next_frame_ns(&app.img) > now_ms)
             timeout = (double)(image_next_frame_ns(&app.img) - now_ms) / 1000.0;
 
-        glfwWaitEventsTimeout(timeout);
         app.img.rerender = true;
+        glfwWaitEventsTimeout(timeout);
     }
 
     app_destroy(&app);
