@@ -43,7 +43,7 @@ typedef struct Image
 {
     _Atomic ImageState state;
 
-    char const *path; // UNLOADED | Borrowed
+    char *path; // UNLOADED
 
     unsigned width;         // LOADED
     unsigned height;        // LOADED
@@ -56,11 +56,6 @@ typedef struct Image
     bool rerender;    // UPLOADED
 } Image;
 
-/**
- * Creates an image
- * @param self Image
- * @param path Path of the image. Borrowed
- */
 void image_create(Image *self, char const *path);
 void image_destroy(Image *self);
 

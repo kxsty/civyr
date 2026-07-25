@@ -10,10 +10,7 @@
 #include "utils.h"
 
 static void image_unloaded_to_loaded(Image *const self, int const w, int const h, unsigned char const channels,
-                                     unsigned char *const pixels,
-                                     SpecificImage
-
-                                     const spec)
+                                     unsigned char *const pixels, SpecificImage const spec)
 {
     image_assert_unloaded(self);
 
@@ -220,8 +217,12 @@ void image_create(Image *const self, char const *const path)
 {
     assert(self != nullptr);
 
+    char *const path_c = path ? strdup(path) : nullptr;
+    if (path && !path_c)
+        panic("%s", strerror(errno));
+
     *self = (Image){
-        .path = path,
+        .path = path_c,
         .state = IMAGE_STATE_UNLOADED,
     };
 }
@@ -231,6 +232,9 @@ void image_destroy(Image *const self)
     image_assert(self);
 
     image_to_unloaded(self);
+
+    if (self->path)
+        free(self->path);
 }
 
 bool image_load(Image *const self)
