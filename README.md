@@ -1,4 +1,4 @@
-<img align="left" width="32" height="32" alt="civyr icon" src="https://github.com/user-attachments/assets/19334a1a-bc6e-457f-bc83-f1f6ad5b9aaf" />
+<img width="128" height="128" alt="civyr icon" src="https://github.com/user-attachments/assets/19334a1a-bc6e-457f-bc83-f1f6ad5b9aaf" />
 
 # civyr
 
