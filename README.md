@@ -2,7 +2,7 @@
 Minimal image viewer
 
 # screenshoots
-<img width="1920" height="1080" alt="{BF984A09-125D-467B-80F3-7A618890287A}-1" src="https://github.com/user-attachments/assets/e01f242a-2949-4200-81c6-a9d6936a7366" />
+<img width="1163" height="806" alt="{58557051-1774-4810-B7DD-D563A5A3A197}" src="https://github.com/user-attachments/assets/7ed89f76-bc9b-4792-ba91-b186be5f8804" />
 
 # built with
 - C
