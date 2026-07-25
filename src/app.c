@@ -71,18 +71,18 @@ void app_create(App *const self, char const *argv0, char const *image_path)
 
     vips_cache_set_max(0);
 
+    image_create(&self->img, image_path);
+
     char const *win_title;
     if (image_path)
     {
         LOG(LOG_TRACE, "Starting image loading");
-        image_create(&self->img, image_path);
         image_load_detached(&self->img);
 
         win_title = path_basename(image_path);
     }
     else
     {
-        image_create(&self->img, "");
         win_title = "civyr";
     }
 

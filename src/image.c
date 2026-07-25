@@ -218,7 +218,7 @@ err:
 
 void image_create(Image *const self, char const *const path)
 {
-    assert(self && path);
+    assert(self);
 
     *self = (Image){
         .path = path,
