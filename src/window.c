@@ -198,8 +198,13 @@ static void drop_callback(GLFWwindow *window, int const path_count, char const *
 
     App *const app = glfwGetWindowUserPointer(window);
     char const *path = paths[0];
+    if (!path)
+        return;
 
-    if (strcmp(path, app->img.path) == 0)
+    if (path == app->img.path)
+        return;
+
+    if (app->img.path && strcmp(path, app->img.path) == 0)
         return;
 
     Image img;
