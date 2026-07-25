@@ -1,4 +1,4 @@
-<img width="128" height="128" alt="civyr icon" src="https://github.com/user-attachments/assets/19334a1a-bc6e-457f-bc83-f1f6ad5b9aaf" />
+<img width="64" height="64" alt="civyr icon" src="https://github.com/user-attachments/assets/19334a1a-bc6e-457f-bc83-f1f6ad5b9aaf" />
 
 # civyr
 
@@ -6,24 +6,30 @@ Minimal and fast image viewer written in c.
 
 Supports a wide range of image formats through the libvips and ImageMagick libraries.
 
-# Screenshoots
+# Installation
 
-<img width="1163" height="806" alt="{58557051-1774-4810-B7DD-D563A5A3A197}" src="https://github.com/user-attachments/assets/7ed89f76-bc9b-4792-ba91-b186be5f8804" />
+# Building
+
+See [BUILD.md](BUILD.md)
 
 # Usage
 
-- Zoom in/out: Scroll Wheel
-- Pan viewport: Left Click + Drag
-- Recenter view: Middle Click
-- Rotate image: ↑ / ↓ Arrow Keys
+- Zoom: Scroll Wheel
+- Pan: Left Click + Drag
+- Recenter: Middle Click
+- Rotate: ↑ / ↓ Arrow Keys
 - Toggle fullscreen: F11 key
-- Drag & Drop: Load a new image by dragging and dropping it into the viewer
-- Toggle texture filtering: I key
+- Toggle image filtering: I key
+- Drag & Drop: Load an image by dragging and dropping it into the window
 
-# Built with
+# Stack
 
 - C
 - GLFW
 - OpenGL
 - libvips
 - ImageMagick
+
+# Screenshoots
+
+<img width="1163" height="806" alt="{E6C1B2C6-31BC-47A6-8DF8-2B48D2250526}" src="https://github.com/user-attachments/assets/94cbd92e-71a3-4977-ba6d-9483541d06c3" />
