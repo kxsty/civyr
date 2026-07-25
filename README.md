@@ -18,6 +18,6 @@ Supports a wide range of image formats through the libvips and ImageMagick libra
 # Built with
 - C
 - GLFW
-- OpenGL 3.3
+- OpenGL
 - libvips
 - ImageMagick
