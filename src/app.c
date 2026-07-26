@@ -9,6 +9,8 @@
 
 static void calc_window_rect(Window const *const win, int *x, int *y, unsigned *const width, unsigned *const height)
 {
+    assert(x != nullptr && y != nullptr && width != nullptr && height != nullptr);
+
     int wx, wy;
     unsigned ww, wh;
     window_workarea(win, &wx, &wy, &ww, &wh);
@@ -27,6 +29,8 @@ static void calc_window_rect(Window const *const win, int *x, int *y, unsigned *
 
 static void update_animation(AnimatedImage *const anim)
 {
+    assert(anim != nullptr);
+
     long long const now_ms = time_now_ms();
 
     if (anim->next_frame_ms == 0)
@@ -46,6 +50,8 @@ static void update_animation(AnimatedImage *const anim)
 
 static void extent_rotate(unsigned *const width, unsigned *const height, double const angle)
 {
+    assert(width != nullptr && height != nullptr);
+
     switch ((int)angle)
     {
     case 0:
@@ -65,6 +71,8 @@ static void extent_rotate(unsigned *const width, unsigned *const height, double 
 
 void app_create(App *const self, char const *argv0, char const *image_path)
 {
+    assert(self != nullptr);
+
     LOG(LOG_TRACE, "Inititalizing vips");
     if (VIPS_INIT(argv0) != 0)
         panic("vips initialization failed: %s", vips_error_buffer());
@@ -103,7 +111,7 @@ void app_create(App *const self, char const *argv0, char const *image_path)
 
 void app_destroy(App *const self)
 {
-    app_assert(self);
+    assert(self != nullptr);
 
     image_destroy(&self->img);
     renderer_destroy(&self->ren);
@@ -124,12 +132,9 @@ void app_render_bg(App const *self)
 void app_render_image(App *const self)
 {
     app_assert(self);
+    image_assert_uploaded(&self->img);
 
     renderer_draw_color(&self->ren, BG_RGBA);
-
-    assert(self->img.state >= IMAGE_STATE_UPLOADED);
-    if (self->img.state < IMAGE_STATE_LOADED)
-        return;
 
     if (self->img.spec.type == IMAGE_TYPE_ANIMATED)
         update_animation(&self->img.spec.anim);
@@ -146,8 +151,6 @@ void app_center_image(App *const self)
 {
     app_assert(self);
     image_assert_uploaded(&self->img);
-    if (self->img.state < IMAGE_STATE_UPLOADED)
-        return;
 
     unsigned width = self->img.width, height = self->img.height;
     extent_rotate(&width, &height, self->ren.camera.angle);
@@ -164,6 +167,9 @@ void app_center_image(App *const self)
 
 static void app_window_rename(App const *const self)
 {
+    app_assert(self);
+    image_assert_loaded(&self->img);
+
     char title[512];
     snprintf(title, sizeof(title), "%s - %i x %i", path_basename(self->img.path), self->img.width, self->img.height);
 
@@ -190,6 +196,7 @@ void app_upload_image(App *const self)
 void app_zoom_image(App *const self, bool const inward)
 {
     app_assert(self);
+    image_assert_uploaded(&self->img);
 
     double const zoom_delta = inward ? 1.25 : 1 / 1.25;
     double zoom = self->ren.camera.zoom * zoom_delta;
@@ -218,6 +225,7 @@ void app_zoom_image(App *const self, bool const inward)
 void app_mirror_image(App *self, bool const x, bool const y)
 {
     app_assert(self);
+    image_assert_uploaded(&self->img);
 
     if (x)
         self->ren.camera.mirror_x = !self->ren.camera.mirror_x;
@@ -230,6 +238,7 @@ void app_mirror_image(App *self, bool const x, bool const y)
 void app_move_image(App *const self, double const x_offset, double const y_offset)
 {
     app_assert(self);
+    image_assert_uploaded(&self->img);
 
     self->ren.camera.x -= x_offset / self->ren.camera.zoom;
     self->ren.camera.y += y_offset / self->ren.camera.zoom;
@@ -240,9 +249,11 @@ void app_move_image(App *const self, double const x_offset, double const y_offse
 void app_rotate_image(App *const self, bool const clockwise)
 {
     app_assert(self);
+    image_assert_uploaded(&self->img);
 
     int const delta = clockwise ? 90 : -90;
     self->ren.camera.angle = ((int)self->ren.camera.angle + delta + 360) % 360;
+
     self->img.recenter = true;
     self->img.rerender = true;
 }
