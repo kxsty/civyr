@@ -216,6 +216,12 @@ static void key_callback(GLFWwindow *const window, int const key, [[maybe_unused
         texture_toggle_filter(&app->ren, app->img.texture);
         app->img.rerender = true;
         break;
+    case GLFW_KEY_1:
+        if (app->img.state < IMAGE_STATE_UPLOADED)
+            break;
+        app->ren.camera.zoom = 1;
+        app->img.rerender = true;
+        break;
     default:
         break;
     }
