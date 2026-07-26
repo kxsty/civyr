@@ -17,13 +17,6 @@ typedef struct Camera
     bool mirror_y;
 } Camera;
 
-typedef struct Buffers
-{
-    unsigned VAO;
-    unsigned VBO;
-    unsigned EBO;
-} Buffers;
-
 typedef struct Uniforms
 {
     int mvp;
@@ -36,26 +29,31 @@ typedef struct Shaders
     Uniforms uniforms;
 } Shaders;
 
+typedef struct Buffers
+{
+    unsigned VAO;
+    unsigned VBO;
+    unsigned EBO;
+} Buffers;
+
 typedef struct Textures
 {
     unsigned max_size;
     unsigned max_depth;
 } Textures;
 
-struct Renderer
+typedef struct Renderer
 {
     Camera camera;
 
-    Buffers buffers;
     Shaders shaders;
+    Buffers buffers;
     Textures textures;
 
     GLFWwindow *win; // Borrowed
 
     bool initialized;
-};
-
-typedef struct Renderer Renderer;
+} Renderer;
 
 void renderer_create(Renderer *self, GLFWwindow *win);
 void renderer_init(Renderer *self);

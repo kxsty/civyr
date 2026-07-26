@@ -21,10 +21,10 @@ typedef struct Window
 bool window_and_renderer_create(Window *self, Renderer *ren, char const *title);
 void window_destroy(Window const *self);
 
-void window_rename(Window const *self, char const *title);
 void window_transform(Window const *self, int x, int y, unsigned width, unsigned height);
 void window_workarea(Window const *self, int *x, int *y, unsigned *width, unsigned *height);
 void window_toggle_fullscreen(Window const *self);
+void window_rename(Window const *self, char const *title);
 
 #ifdef NDEBUG
 #define window_assert(self) (void)(0)

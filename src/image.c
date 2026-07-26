@@ -9,40 +9,8 @@
 #include "renderer.h"
 #include "utils.h"
 
-static void image_unloaded_to_loaded(Image *const self, int const w, int const h, unsigned char const channels,
-                                     unsigned char *const pixels, SpecificImage const spec)
-{
-    image_assert_unloaded(self);
-    assert(pixels != nullptr);
-
-    self->width = w;
-    self->height = h;
-    self->pixels = pixels;
-    self->channels = channels;
-    self->spec = spec;
-
-    self->state = IMAGE_STATE_LOADED;
-}
-
-static void image_loaded_to_uploaded(Image *const self, unsigned int const texture)
-{
-    image_assert_loaded(self);
-
-    self->texture = texture;
-    self->recenter = true;
-    self->rerender = true;
-    if (self->pixels)
-    {
-        g_free(self->pixels);
-        self->pixels = nullptr;
-    }
-
-    self->state = IMAGE_STATE_UPLOADED;
-}
-
 static void static_image_create([[maybe_unused]] StaticImage const *const self)
 {
-    assert(self != nullptr);
 }
 
 static void static_image_destroy([[maybe_unused]] StaticImage const *const self)
@@ -65,6 +33,65 @@ static void animated_image_destroy(AnimatedImage const *const self)
 
     if (self->delays_ms)
         free(self->delays_ms);
+}
+
+static void image_unloaded_to_loaded(Image *const self, unsigned const w, unsigned const h,
+                                     unsigned char const channels, SpecificImage const spec,
+                                     unsigned char *const pixels)
+{
+    image_assert_unloaded(self);
+    assert(pixels != nullptr);
+
+    self->width = w;
+    self->height = h;
+    self->channels = channels;
+    self->spec = spec;
+    self->pixels = pixels;
+
+    self->state = IMAGE_STATE_LOADED;
+}
+
+static void image_loaded_to_uploaded(Image *const self, unsigned const texture)
+{
+    image_assert_loaded(self);
+
+    if (self->pixels)
+    {
+        g_free(self->pixels);
+        self->pixels = nullptr;
+    }
+    self->texture = texture;
+    self->recenter = true;
+    self->rerender = true;
+
+    self->state = IMAGE_STATE_UPLOADED;
+}
+
+static void image_to_unloaded(Image *const self)
+{
+    assert(self != nullptr);
+
+    switch (self->spec.type)
+    {
+    case IMAGE_TYPE_STATIC:
+        static_image_destroy(&self->spec.stat);
+        break;
+    case IMAGE_TYPE_ANIMATED:
+        animated_image_destroy(&self->spec.anim);
+        break;
+    }
+    if (self->pixels)
+    {
+        g_free(self->pixels);
+        self->pixels = nullptr;
+    }
+    if (self->texture)
+    {
+        texture_destroy(self->texture);
+        self->texture = 0;
+    }
+
+    self->state = IMAGE_STATE_UNLOADED;
 }
 
 static int bsearch_strcasecmp(void const *const s1, void const *const s2)
@@ -100,34 +127,7 @@ static ImageType image_file_get_type(char const *const path)
     return is_anim ? IMAGE_TYPE_ANIMATED : IMAGE_TYPE_STATIC;
 }
 
-static void image_to_unloaded(Image *const self)
-{
-    assert(self != nullptr);
-
-    if (self->pixels)
-    {
-        g_free(self->pixels);
-        self->pixels = nullptr;
-    }
-    if (self->texture)
-    {
-        texture_destroy(self->texture);
-        self->texture = 0;
-    }
-    switch (self->spec.type)
-    {
-    case IMAGE_TYPE_STATIC:
-        static_image_destroy(&self->spec.stat);
-        break;
-    case IMAGE_TYPE_ANIMATED:
-        animated_image_destroy(&self->spec.anim);
-        break;
-    }
-
-    self->state = IMAGE_STATE_UNLOADED;
-}
-
-static int *get_delays(VipsImage *in, int const frame_count, int *const count)
+static int *get_delays(VipsImage *in, unsigned const frame_count, unsigned *const count)
 {
     assert(in != nullptr && frame_count > 0 && count != nullptr);
 
@@ -189,9 +189,9 @@ err:
     return nullptr;
 }
 
-static bool vips_image_get_fields_internal(VipsImage *const img, ImageType const type, int *const width,
-                                           int *const height, int *const channels, int *const count, int **const delays,
-                                           unsigned char **const pixels)
+static bool vips_image_get_fields_internal(VipsImage *const img, ImageType const type, unsigned *const width,
+                                           unsigned *const height, unsigned char *const channels, unsigned *const count,
+                                           int **const delays, unsigned char **const pixels)
 {
     assert(img != nullptr && width != nullptr && height != nullptr && channels != nullptr && count != nullptr &&
            delays != nullptr && pixels != nullptr);
@@ -228,9 +228,17 @@ err:
     return false;
 }
 
+static void *image_load_callback(void *const arg)
+{
+    if (!image_load(arg))
+        panic("Failed to load image");
+
+    return nullptr;
+}
+
 void image_create(Image *const self, char const *const path)
 {
-    assert(self != nullptr);
+    assert(self != nullptr && (path == nullptr || path[0] != '\0'));
 
     char *const path_c = path ? strdup(path) : nullptr;
     if (path && !path_c)
@@ -254,7 +262,6 @@ void image_destroy(Image *const self)
 
 bool image_load(Image *const self)
 {
-
     image_assert_unloaded(self);
 
     unsigned long long const start = time_now_ms();
@@ -264,8 +271,10 @@ bool image_load(Image *const self)
     if (!v_img)
         goto err;
 
-    int w, h, channels;
-    int count, *delays;
+    unsigned w, h;
+    unsigned char channels;
+    unsigned count;
+    int *delays;
     unsigned char *pixels;
     if (!vips_image_get_fields_internal(v_img, type, &w, &h, &channels, &count, &delays, &pixels))
         goto err_v_img;
@@ -281,7 +290,7 @@ bool image_load(Image *const self)
         break;
     }
 
-    image_unloaded_to_loaded(self, w, h, channels, pixels, spec);
+    image_unloaded_to_loaded(self, w, h, channels, spec, pixels);
 
     g_object_unref(v_img);
     LOG(LOG_INFO, "Loaded image \"%s\" in %llds", path_basename(self->path), time_since_ms(start));
@@ -292,15 +301,6 @@ err_v_img:
 err:
     image_to_unloaded(self);
     return false;
-}
-
-static void *image_load_callback(void *const arg)
-{
-    if (!image_load(arg))
-        panic("Failed to load image");
-
-    glfwPostEmptyEvent();
-    return nullptr;
 }
 
 void image_load_detached(Image *const self)
@@ -351,7 +351,7 @@ void image_upload(Image *const self, Renderer const *ren)
     LOG(LOG_INFO, "Uploaded image in %lldms", time_since_ms(start));
 }
 
-void image_file_get_size(char const *const path, int *const width, int *const height)
+void image_file_get_size(char const *const path, unsigned *const width, unsigned *const height)
 {
     assert(path != nullptr && *path != '\0' && width != nullptr && height != nullptr);
 
@@ -359,8 +359,6 @@ void image_file_get_size(char const *const path, int *const width, int *const he
     if (!img)
         panic("Failed to load image: %s", vips_error_buffer());
 
-    *width = vips_image_get_width(img);
-    *height = vips_image_get_page_height(img);
     *width = vips_image_get_width(img);
     *height = vips_image_get_page_height(img);
 

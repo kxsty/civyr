@@ -48,8 +48,8 @@ typedef struct Image
     unsigned width;         // LOADED
     unsigned height;        // LOADED
     unsigned char channels; // LOADED
-    unsigned char *pixels;  // LOADED
     SpecificImage spec;     // LOADED
+    unsigned char *pixels;  // LOADED
 
     unsigned texture; // UPLOADED
     bool recenter;    // UPLOADED
@@ -59,7 +59,7 @@ typedef struct Image
 void image_create(Image *self, char const *path);
 void image_destroy(Image *self);
 
-static unsigned image_frame_count(Image const *self)
+static unsigned image_frame_count(Image const *const self)
 {
     if (self->state < IMAGE_STATE_LOADED)
         panic("State mismatch");
@@ -75,7 +75,7 @@ static unsigned image_frame_count(Image const *self)
     }
 }
 
-static unsigned image_curr_frame(Image const *self)
+static unsigned image_curr_frame(Image const *const self)
 {
     if (self->state < IMAGE_STATE_LOADED)
         panic("State mismatch");
@@ -91,7 +91,7 @@ static unsigned image_curr_frame(Image const *self)
     }
 }
 
-static long long image_next_frame_ns(Image const *self)
+static long long image_next_frame_ns(Image const *const self)
 {
     if (self->state < IMAGE_STATE_LOADED)
         panic("State mismatch");
@@ -106,7 +106,7 @@ bool image_load(Image *self);
 void image_load_detached(Image *self);
 void image_upload(Image *self, Renderer const *ren);
 
-void image_file_get_size(char const *path, int *width, int *height);
+void image_file_get_size(char const *path, unsigned *width, unsigned *height);
 
 #ifdef NDEBUG
 #define static_image_assert(self) (void)(0)

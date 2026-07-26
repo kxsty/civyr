@@ -149,7 +149,7 @@ static void textures_init(Textures *const self)
 static void matrix_model(mat4 dest, float const tex_w, float const tex_h, float const angle, bool const mirror_x,
                          bool const mirror_y)
 {
-    assert(dest != nullptr && tex_w > 0.0f && tex_h > 0.0f);
+    assert(dest != nullptr && tex_w > 0 && tex_h > 0);
 
     glm_mat4_identity(dest);
 
@@ -172,7 +172,7 @@ static void matrix_view(mat4 dest, float const x, float const y)
 
 static void matrix_projection(mat4 dest, float const win_w, float const win_h, float const zoom)
 {
-    assert(dest != nullptr);
+    assert(dest != nullptr && win_w > 0 && win_h > 0 && zoom > 0);
 
     float const half_w = win_w * 0.5f / zoom;
     float const half_h = win_h * 0.5f / zoom;
@@ -232,7 +232,7 @@ void renderer_create(Renderer *const self, GLFWwindow *const win)
     };
 }
 
-void renderer_init(Renderer *self)
+void renderer_init(Renderer *const self)
 {
     renderer_assert_uninitialized(self);
 
@@ -295,14 +295,12 @@ void renderer_draw_texture(Renderer const *const self, unsigned const texture, u
     glBindVertexArray(0);
 }
 
-void renderer_present(Renderer const *self)
+void renderer_present(Renderer const *const self)
 {
     renderer_assert(self);
 
     glfwSwapBuffers(self->win);
 }
-
-typedef unsigned Texture;
 
 unsigned texture_create(Renderer const *const ren, unsigned const width, unsigned const height, unsigned const depth,
                         unsigned char const channels, unsigned char const *const pixels)

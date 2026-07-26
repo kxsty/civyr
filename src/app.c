@@ -7,7 +7,8 @@
 
 #include "app.h"
 
-static void calc_window_rect(Window const *const win, int *x, int *y, unsigned *const width, unsigned *const height)
+static void calc_window_rect(Window const *const win, int *const x, int *const y, unsigned *const width,
+                             unsigned *const height)
 {
     assert(x != nullptr && y != nullptr && width != nullptr && height != nullptr);
 
@@ -69,7 +70,18 @@ static void extent_rotate(unsigned *const width, unsigned *const height, double 
     }
 }
 
-void app_create(App *const self, char const *argv0, char const *image_path)
+static void app_window_rename(App const *const self)
+{
+    app_assert(self);
+    image_assert_loaded(&self->img);
+
+    char title[512];
+    snprintf(title, sizeof(title), "%s - %i x %i", path_basename(self->img.path), self->img.width, self->img.height);
+
+    window_rename(&self->win, title);
+}
+
+void app_create(App *const self, char const *const argv0, char const *const image_path)
 {
     assert(self != nullptr);
 
@@ -121,6 +133,23 @@ void app_destroy(App *const self)
     glfwTerminate();
 }
 
+void app_upload_image(App *const self)
+{
+    app_assert(self);
+    image_assert_loaded(&self->img);
+
+    int x, y;
+    unsigned width = self->img.width, height = self->img.height;
+    calc_window_rect(&self->win, &x, &y, &width, &height);
+
+    window_transform(&self->win, x, y, width, height);
+
+    app_window_rename(self);
+
+    image_upload(&self->img, &self->ren);
+    image_assert_uploaded(&self->img);
+}
+
 void app_render_bg(App const *self)
 {
     app_assert(self);
@@ -145,52 +174,6 @@ void app_render_image(App *const self)
     renderer_present(&self->ren);
 
     self->img.rerender = false;
-}
-
-void app_center_image(App *const self)
-{
-    app_assert(self);
-    image_assert_uploaded(&self->img);
-
-    unsigned width = self->img.width, height = self->img.height;
-    extent_rotate(&width, &height, self->ren.camera.angle);
-
-    self->ren.camera.zoom = fmin((double)self->win.width / width, (double)self->win.height / height);
-
-    self->ren.camera.x = 0;
-    self->ren.camera.y = 0;
-    LOG(LOG_TRACE, "camera:{zoom:%f,x:%f,y:%f,angle:%f}", self->ren.camera.zoom, self->ren.camera.x, self->ren.camera.y,
-        self->ren.camera.angle);
-
-    self->img.recenter = false;
-}
-
-static void app_window_rename(App const *const self)
-{
-    app_assert(self);
-    image_assert_loaded(&self->img);
-
-    char title[512];
-    snprintf(title, sizeof(title), "%s - %i x %i", path_basename(self->img.path), self->img.width, self->img.height);
-
-    window_rename(&self->win, title);
-}
-
-void app_upload_image(App *const self)
-{
-    app_assert(self);
-    image_assert_loaded(&self->img);
-
-    int x, y;
-    unsigned width = self->img.width, height = self->img.height;
-    calc_window_rect(&self->win, &x, &y, &width, &height);
-
-    window_transform(&self->win, x, y, width, height);
-
-    app_window_rename(self);
-
-    image_upload(&self->img, &self->ren);
-    image_assert_uploaded(&self->img);
 }
 
 void app_zoom_image(App *const self, bool const inward)
@@ -222,20 +205,7 @@ void app_zoom_image(App *const self, bool const inward)
     self->img.rerender = true;
 }
 
-void app_mirror_image(App *self, bool const x, bool const y)
-{
-    app_assert(self);
-    image_assert_uploaded(&self->img);
-
-    if (x)
-        self->ren.camera.mirror_x = !self->ren.camera.mirror_x;
-    if (y)
-        self->ren.camera.mirror_y = !self->ren.camera.mirror_y;
-
-    self->img.rerender = true;
-}
-
-void app_move_image(App *const self, double const x_offset, double const y_offset)
+void app_pan_image(App *const self, double const x_offset, double const y_offset)
 {
     app_assert(self);
     image_assert_uploaded(&self->img);
@@ -256,4 +226,35 @@ void app_rotate_image(App *const self, bool const clockwise)
 
     self->img.recenter = true;
     self->img.rerender = true;
+}
+
+void app_mirror_image(App *const self, bool const x, bool const y)
+{
+    app_assert(self);
+    image_assert_uploaded(&self->img);
+
+    if (x)
+        self->ren.camera.mirror_x = !self->ren.camera.mirror_x;
+    if (y)
+        self->ren.camera.mirror_y = !self->ren.camera.mirror_y;
+
+    self->img.rerender = true;
+}
+
+void app_center_image(App *const self)
+{
+    app_assert(self);
+    image_assert_uploaded(&self->img);
+
+    unsigned width = self->img.width, height = self->img.height;
+    extent_rotate(&width, &height, self->ren.camera.angle);
+
+    self->ren.camera.zoom = fmin((double)self->win.width / width, (double)self->win.height / height);
+
+    self->ren.camera.x = 0;
+    self->ren.camera.y = 0;
+    LOG(LOG_TRACE, "camera:{zoom:%f,x:%f,y:%f,angle:%f}", self->ren.camera.zoom, self->ren.camera.x, self->ren.camera.y,
+        self->ren.camera.angle);
+
+    self->img.recenter = false;
 }
