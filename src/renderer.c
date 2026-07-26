@@ -27,6 +27,8 @@ static char constexpr fragmentShaderSource[] = "#version 330 core\n"
 
 static unsigned shader_compile(unsigned const type, char const *const source)
 {
+    assert(source != nullptr && *source != '\0');
+
     unsigned const shader = glCreateShader(type);
 
     glShaderSource(shader, 1, &source, nullptr);
@@ -46,12 +48,16 @@ static unsigned shader_compile(unsigned const type, char const *const source)
 
 static void uniforms_init(Uniforms *const self, unsigned const shader_program)
 {
+    assert(self != nullptr && shader_program != 0);
+
     self->mvp = glGetUniformLocation(shader_program, "u_mvp");
     self->depth = glGetUniformLocation(shader_program, "u_depth");
 }
 
 static void shaders_init(Shaders *const shaders)
 {
+    assert(shaders != nullptr);
+
     unsigned const vertex_shader = shader_compile(GL_VERTEX_SHADER, vertexShaderSource);
     unsigned const fragment_shader = shader_compile(GL_FRAGMENT_SHADER, fragmentShaderSource);
     shaders->program = glCreateProgram();
@@ -77,11 +83,15 @@ static void shaders_init(Shaders *const shaders)
 
 static void shaders_destroy(Shaders const *const shaders)
 {
+    assert(shaders != nullptr);
+
     glDeleteProgram(shaders->program);
 }
 
 static void buffers_init(Buffers *const self)
 {
+    assert(self != nullptr);
+
     float constexpr vertices[] = {
         0.5f,  0.5f,  1.0f, 1.0f, //
         0.5f,  -0.5f, 1.0f, 0.0f, //
@@ -113,6 +123,8 @@ static void buffers_init(Buffers *const self)
 
 static void buffers_destroy(Buffers const *const self)
 {
+    assert(self != nullptr);
+
     if (self->VAO)
         glDeleteVertexArrays(1, &self->VAO);
     if (self->VBO)
@@ -123,6 +135,8 @@ static void buffers_destroy(Buffers const *const self)
 
 static void textures_init(Textures *const self)
 {
+    assert(self != nullptr);
+
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -135,6 +149,8 @@ static void textures_init(Textures *const self)
 static void matrix_model(mat4 dest, float const tex_w, float const tex_h, float const angle, bool const mirror_x,
                          bool const mirror_y)
 {
+    assert(dest != nullptr && tex_w > 0.0f && tex_h > 0.0f);
+
     glm_mat4_identity(dest);
 
     glm_rotate(dest, glm_rad(angle), (vec3){0.0f, 0.0f, 1.0f});
@@ -147,6 +163,8 @@ static void matrix_model(mat4 dest, float const tex_w, float const tex_h, float 
 
 static void matrix_view(mat4 dest, float const x, float const y)
 {
+    assert(dest != nullptr);
+
     glm_mat4_identity(dest);
 
     glm_translate(dest, (vec3){-x, y, 0.0f});
@@ -154,6 +172,8 @@ static void matrix_view(mat4 dest, float const x, float const y)
 
 static void matrix_projection(mat4 dest, float const win_w, float const win_h, float const zoom)
 {
+    assert(dest != nullptr);
+
     float const half_w = win_w * 0.5f / zoom;
     float const half_h = win_h * 0.5f / zoom;
 
@@ -175,6 +195,8 @@ static void matrix_mvp(mat4 dest, float const tex_w, float const tex_h, float co
 
 static int texture_channels_to_gl_format(unsigned char const channels)
 {
+    assert(channels > 0);
+
     switch (channels)
     {
     case 1:
@@ -191,6 +213,8 @@ static int texture_channels_to_gl_format(unsigned char const channels)
 
 void renderer_create(Renderer *const self, GLFWwindow *const win)
 {
+    assert(self != nullptr && win != nullptr);
+
     glfwMakeContextCurrent(win);
     if (!gladLoadGL(glfwGetProcAddress))
         panic("Failed to initialize GLAD");
@@ -210,8 +234,7 @@ void renderer_create(Renderer *const self, GLFWwindow *const win)
 
 void renderer_init(Renderer *self)
 {
-    if (self->initialized)
-        return;
+    renderer_assert_uninitialized(self);
 
     shaders_init(&self->shaders);
 
@@ -224,7 +247,10 @@ void renderer_init(Renderer *self)
 
 void renderer_destroy(Renderer const *const self)
 {
-    assert(self);
+    assert(self != nullptr);
+
+    if (!self->initialized)
+        return;
 
     buffers_destroy(&self->buffers);
     shaders_destroy(&self->shaders);
@@ -232,11 +258,16 @@ void renderer_destroy(Renderer const *const self)
 
 void renderer_set_viewport([[maybe_unused]] Renderer *const self, int const width, int const height)
 {
-    glViewport(0, 0, width, height);
+    renderer_assert_initialized(self);
+    assert(width > 0 && height > 0);
+
+    glViewport(0, 0, (int)width, (int)height);
 }
 
-void renderer_draw_color([[maybe_unused]] Renderer const *const self, unsigned char const rgba[4])
+void renderer_draw_color(Renderer const *const self, unsigned char const rgba[4])
 {
+    renderer_assert(self);
+
     glClearColor((float)rgba[0] / 255.0f, (float)rgba[1] / 255.0f, (float)rgba[2] / 255.0f, (float)rgba[3] / 255.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 }
@@ -244,8 +275,8 @@ void renderer_draw_color([[maybe_unused]] Renderer const *const self, unsigned c
 void renderer_draw_texture(Renderer const *const self, unsigned const texture, unsigned const width,
                            unsigned const height, unsigned const depth)
 {
-    if (!self->initialized)
-        panic("Renderer not initialized");
+    renderer_assert_initialized(self);
+    assert(texture > 0 && width > 0 && height > 0);
 
     glUseProgram(self->shaders.program);
 
@@ -266,6 +297,8 @@ void renderer_draw_texture(Renderer const *const self, unsigned const texture, u
 
 void renderer_present(Renderer const *self)
 {
+    renderer_assert(self);
+
     glfwSwapBuffers(self->win);
 }
 
@@ -274,8 +307,7 @@ typedef unsigned Texture;
 unsigned texture_create(Renderer const *const ren, unsigned const width, unsigned const height, unsigned const depth,
                         unsigned char const channels, unsigned char const *const pixels)
 {
-    if (!ren->initialized)
-        panic("Renderer not initialized");
+    renderer_assert_initialized(ren);
 
     if (width < 1 || height < 1)
         panic("Texture size too small: %d x %d", width, height);
@@ -308,14 +340,16 @@ unsigned texture_create(Renderer const *const ren, unsigned const width, unsigne
 
 void texture_destroy(unsigned const texture)
 {
+    assert(texture != 0);
+
     if (texture)
         glDeleteTextures(1, &texture);
 }
 
 void texture_toggle_filter(Renderer const *const ren, unsigned const texture)
 {
-    if (!ren->initialized)
-        panic("Renderer not initialized");
+    renderer_assert_initialized(ren);
+    assert(texture != 0);
 
     glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
 

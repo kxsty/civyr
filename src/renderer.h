@@ -83,6 +83,9 @@ void texture_destroy(unsigned texture);
 
 void texture_toggle_filter(Renderer const *ren, unsigned texture);
 
+#ifdef NDEBUG
+#define renderer_assert_initialized(self) (void)(0)
+#else
 #define renderer_assert_initialized(self)                                                                              \
     do                                                                                                                 \
     {                                                                                                                  \
@@ -98,8 +101,13 @@ void texture_toggle_filter(Renderer const *ren, unsigned texture);
         assert((self)->buffers.EBO != 0);                                                                              \
         assert((self)->textures.max_size != 0);                                                                        \
         assert((self)->textures.max_depth != 0);                                                                       \
+        assert((self)->initialized == true);                                                                           \
     } while (0)
+#endif
 
+#ifdef NDEBUG
+#define renderer_assert_uninitialized(self) (void)(0)
+#else
 #define renderer_assert_uninitialized(self)                                                                            \
     do                                                                                                                 \
     {                                                                                                                  \
@@ -113,8 +121,13 @@ void texture_toggle_filter(Renderer const *ren, unsigned texture);
         assert((self)->buffers.EBO == 0);                                                                              \
         assert((self)->textures.max_size == 0);                                                                        \
         assert((self)->textures.max_depth == 0);                                                                       \
+        assert((self)->initialized == false);                                                                          \
     } while (0)
+#endif
 
+#ifdef NDEBUG
+#define renderer_assert(self) (void)(0)
+#else
 #define renderer_assert(self)                                                                                          \
     do                                                                                                                 \
     {                                                                                                                  \
@@ -123,5 +136,6 @@ void texture_toggle_filter(Renderer const *ren, unsigned texture);
         else                                                                                                           \
             renderer_assert_uninitialized(self);                                                                       \
     } while (0)
+#endif
 
 #endif // CIVYR_RENDERER_H
