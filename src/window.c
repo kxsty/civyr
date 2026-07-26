@@ -55,6 +55,40 @@ static bool win32_adapt_dark_mode(GLFWwindow *win)
 #define DEF_WIDTH 800
 #define DEF_HEIGHT 600
 
+static GLFWmonitor *window_best_monitor(Window const *self)
+{
+    window_assert(self);
+
+    int wx, wr, ww, wh;
+    glfwGetWindowPos(self->base, &wx, &wr);
+    glfwGetWindowSize(self->base, &ww, &wh);
+
+    int count;
+    GLFWmonitor **mons = glfwGetMonitors(&count);
+
+    GLFWmonitor *best_mon = nullptr;
+    int best_overlap = 0;
+
+    for (int i = 0; i < count; i++)
+    {
+        int mx, my;
+        glfwGetMonitorPos(mons[i], &mx, &my);
+
+        GLFWvidmode const *mode = glfwGetVideoMode(mons[i]);
+
+        int const overlap = __max(0, __min(wx + ww, mx + mode->width) - __max(wx, mx)) *
+                            __max(0, __min(wr + wh, my + mode->height) - __max(wr, my));
+
+        if (overlap > best_overlap)
+        {
+            best_overlap = overlap;
+            best_mon = mons[i];
+        }
+    }
+
+    return best_mon;
+}
+
 static void framebuffer_size_callback(GLFWwindow *const window, int const width, int const height)
 {
     App *const app = glfwGetWindowUserPointer(window);
@@ -169,21 +203,8 @@ static void key_callback(GLFWwindow *const window, int const key, [[maybe_unused
             app_mirror_image(app, true, false);
         break;
     case GLFW_KEY_F11: {
-        static int prev_x, prev_y, prev_w, prev_h;
-        if (!app->win.is_fullscreen)
-        {
-            GLFWmonitor *const monitor = glfwGetPrimaryMonitor();
-            GLFWvidmode const *const mode = glfwGetVideoMode(monitor);
-            glfwGetWindowPos(window, &prev_x, &prev_y);
-            glfwGetWindowSize(window, &prev_w, &prev_h);
-            glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-        }
-        else
-        {
-            glfwSetWindowMonitor(window, nullptr, prev_x, prev_y, prev_w, prev_h, GLFW_DONT_CARE);
-        }
+        window_toggle_fullscreen(&app->win);
 
-        app->win.is_fullscreen = !app->win.is_fullscreen;
         if (app->img.state >= IMAGE_STATE_UPLOADED)
             app->img.rerender = true;
 
@@ -306,7 +327,6 @@ static void window_create(Window *self, GLFWwindow *const base, int const width,
             },
         .width = width,
         .height = height,
-        .is_fullscreen = false,
     };
 }
 
@@ -352,32 +372,29 @@ void window_workarea(Window const *self, int *x, int *y, unsigned *width, unsign
     window_assert(self);
     assert(x && y && width && height);
 
+    GLFWmonitor *best_mon = window_best_monitor(self);
+
     int wx, wr, ww, wh;
     glfwGetWindowPos(self->base, &wx, &wr);
     glfwGetWindowSize(self->base, &ww, &wh);
 
-    int count;
-    GLFWmonitor **monitors = glfwGetMonitors(&count);
+    glfwGetMonitorWorkarea(best_mon, x, y, (int *)width, (int *)height);
+}
 
-    GLFWmonitor *best_monitor = nullptr;
-    int best_overlap = 0;
-
-    for (int i = 0; i < count; i++)
+void window_toggle_fullscreen(Window const *const self)
+{
+    static int px, py, pw, ph;
+    GLFWmonitor *const win_mon = glfwGetWindowMonitor(self->base);
+    if (!win_mon)
     {
-        int mx, my;
-        glfwGetMonitorPos(monitors[i], &mx, &my);
-
-        GLFWvidmode const *mode = glfwGetVideoMode(monitors[i]);
-
-        int const overlap = __max(0, __min(wx + ww, mx + mode->width) - __max(wx, mx)) *
-                            __max(0, __min(wr + wh, my + mode->height) - __max(wr, my));
-
-        if (overlap > best_overlap)
-        {
-            best_overlap = overlap;
-            best_monitor = monitors[i];
-        }
+        GLFWmonitor *const best_mon = window_best_monitor(self);
+        GLFWvidmode const *const mode = glfwGetVideoMode(best_mon);
+        glfwGetWindowPos(self->base, &px, &py);
+        glfwGetWindowSize(self->base, &pw, &ph);
+        glfwSetWindowMonitor(self->base, best_mon, 0, 0, mode->width, mode->height, mode->refreshRate);
     }
-
-    glfwGetMonitorWorkarea(best_monitor, x, y, (int *)width, (int *)height);
+    else
+    {
+        glfwSetWindowMonitor(self->base, nullptr, px, py, pw, ph, GLFW_DONT_CARE);
+    }
 }
