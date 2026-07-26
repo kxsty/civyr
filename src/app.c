@@ -215,13 +215,13 @@ void app_zoom_image(App *const self, bool const inward)
     self->img.rerender = true;
 }
 
-void app_mirror_image(App *self, bool const mirror_x, bool const mirror_y)
+void app_mirror_image(App *self, bool const x, bool const y)
 {
     app_assert(self);
 
-    if (mirror_x)
+    if (x)
         self->ren.camera.mirror_x = !self->ren.camera.mirror_x;
-    if (mirror_y)
+    if (y)
         self->ren.camera.mirror_y = !self->ren.camera.mirror_y;
 
     self->img.rerender = true;

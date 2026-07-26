@@ -21,7 +21,7 @@ void app_render_bg(App const *self);
 void app_render_image(App *self);
 void app_center_image(App *self);
 void app_zoom_image(App *self, bool inward);
-void app_mirror_image(App *self, bool mirror_x, bool mirror_y);
+void app_mirror_image(App *self, bool x, bool y);
 void app_move_image(App *self, double x_offset, double y_offset);
 void app_rotate_image(App *self, bool clockwise);
 void app_upload_image(App *self);
