@@ -26,6 +26,9 @@ void window_transform(Window const *self, int x, int y, unsigned width, unsigned
 void window_workarea(Window const *self, int *x, int *y, unsigned *width, unsigned *height);
 void window_toggle_fullscreen(Window const *self);
 
+#ifdef NDEBUG
+#define window_assert(self) (void)(0)
+#else
 #define window_assert(self)                                                                                            \
     do                                                                                                                 \
     {                                                                                                                  \
@@ -34,5 +37,6 @@ void window_toggle_fullscreen(Window const *self);
         assert((self)->width > 0);                                                                                     \
         assert((self)->height > 0);                                                                                    \
     } while (0)
+#endif
 
 #endif // CIVYR_WINDOW_H

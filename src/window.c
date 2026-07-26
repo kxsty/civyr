@@ -9,6 +9,8 @@
 #include "app.h"
 #include "utils.h"
 
+#include <float.h>
+
 #ifdef _WIN32
 
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -92,6 +94,7 @@ static GLFWmonitor *window_best_monitor(Window const *self)
 static void framebuffer_size_callback(GLFWwindow *const window, int const width, int const height)
 {
     App *const app = glfwGetWindowUserPointer(window);
+    app_assert(app);
 
     if (width <= 0 || height <= 0)
         return;
@@ -117,10 +120,11 @@ static void framebuffer_size_callback(GLFWwindow *const window, int const width,
 static void scroll_callback(GLFWwindow *const window, [[maybe_unused]] double const xoffset, double const yoffset)
 {
     App *const app = glfwGetWindowUserPointer(window);
+    app_assert(app);
     if (app->img.state < IMAGE_STATE_UPLOADED)
         return;
 
-    if (app->win.mouse.x == -1 && app->win.mouse.y == -1)
+    if (app->win.mouse.x == DBL_MIN && app->win.mouse.y == DBL_MIN)
         glfwGetCursorPos(window, &app->win.mouse.x, &app->win.mouse.y);
 
     app_zoom_image(app, yoffset > 0);
@@ -130,6 +134,7 @@ static void mouse_button_callback(GLFWwindow *const window, int const button, in
                                   [[maybe_unused]] int const mods)
 {
     App *const app = glfwGetWindowUserPointer(window);
+    app_assert(app);
     if (app->img.state < IMAGE_STATE_UPLOADED)
         return;
 
@@ -155,6 +160,7 @@ static void mouse_button_callback(GLFWwindow *const window, int const button, in
 static void cursor_position_callback(GLFWwindow *const window, double const xpos, double const ypos)
 {
     App *const app = glfwGetWindowUserPointer(window);
+    app_assert(app);
     if (app->img.state < IMAGE_STATE_UPLOADED)
         return;
 
@@ -183,6 +189,7 @@ static void key_callback(GLFWwindow *const window, int const key, [[maybe_unused
         return;
 
     App *const app = glfwGetWindowUserPointer(window);
+    app_assert(app);
 
     switch (key)
     {
@@ -232,10 +239,12 @@ static void drop_callback(GLFWwindow *window, int const path_count, char const *
     if (path_count < 1)
         return;
 
-    App *const app = glfwGetWindowUserPointer(window);
     char const *path = paths[0];
     if (!path)
         return;
+
+    App *const app = glfwGetWindowUserPointer(window);
+    app_assert(app);
 
     if (path == app->img.path)
         return;
@@ -259,6 +268,8 @@ static void drop_callback(GLFWwindow *window, int const path_count, char const *
 
 static GLFWwindow *base_window_create(char const *const title)
 {
+    assert(title != nullptr && *title != '\0');
+
     LOG(LOG_TRACE, "Setting window hints");
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -285,6 +296,8 @@ static GLFWwindow *base_window_create(char const *const title)
 
 static void base_window_initialize(GLFWwindow *const self)
 {
+    assert(self != nullptr);
+
     LOG(LOG_TRACE, "Setting window limits");
     glfwSetWindowSizeLimits(self, 160, 120, GLFW_DONT_CARE, GLFW_DONT_CARE);
     glfwSwapInterval(1);
@@ -300,17 +313,21 @@ static void base_window_initialize(GLFWwindow *const self)
 
 static bool base_window_and_renderer_create(char const *const title, GLFWwindow **out_self, Renderer *out_ren)
 {
+    assert(title != nullptr && *title != '\0' && out_self != nullptr && out_ren != nullptr);
+
     *out_self = base_window_create(title);
     if (!*out_self)
         return false;
 
     LOG(LOG_TRACE, "Creating renderer");
     renderer_create(out_ren, *out_self);
+
     LOG(LOG_TRACE, "Rendering background");
     renderer_draw_color(out_ren, BG_RGBA);
     renderer_present(out_ren);
     renderer_draw_color(out_ren, BG_RGBA);
     renderer_present(out_ren);
+
     LOG(LOG_TRACE, "Showing window");
     glfwShowWindow(*out_self);
 
@@ -323,13 +340,14 @@ static bool base_window_and_renderer_create(char const *const title, GLFWwindow 
 
 static void window_create(Window *self, GLFWwindow *const base, int const width, int const height)
 {
+    assert(self != nullptr && base != nullptr && width > 0 && height > 0);
+
     *self = (Window){
         .base = base,
         .mouse =
             {
-                .x = -1,
-                .y = -1,
-                .is_dragging = false,
+                .x = DBL_MIN,
+                .y = DBL_MIN,
             },
         .width = width,
         .height = height,
@@ -338,7 +356,7 @@ static void window_create(Window *self, GLFWwindow *const base, int const width,
 
 bool window_and_renderer_create(Window *const self, Renderer *const ren, char const *const title)
 {
-    assert(self && ren);
+    assert(self != nullptr && ren != nullptr && title != nullptr && *title != '\0');
 
     GLFWwindow *base;
     bool const res = base_window_and_renderer_create(title, &base, ren);
@@ -354,13 +372,13 @@ void window_destroy(Window const *self)
 {
     window_assert(self);
 
-    if (self->base)
-        glfwDestroyWindow(self->base);
+    glfwDestroyWindow(self->base);
 }
 
 void window_rename(Window const *self, char const *const title)
 {
     window_assert(self);
+    assert(title != nullptr && *title != '\0');
 
     glfwSetWindowTitle(self->base, title);
 }
@@ -376,7 +394,7 @@ void window_transform(Window const *self, int const x, int const y, unsigned con
 void window_workarea(Window const *self, int *x, int *y, unsigned *width, unsigned *height)
 {
     window_assert(self);
-    assert(x && y && width && height);
+    assert(x != nullptr && y != nullptr && width != nullptr && height != nullptr);
 
     GLFWmonitor *best_mon = window_best_monitor(self);
 
@@ -389,6 +407,8 @@ void window_workarea(Window const *self, int *x, int *y, unsigned *width, unsign
 
 void window_toggle_fullscreen(Window const *const self)
 {
+    window_assert(self);
+
     static int px, py, pw, ph;
     GLFWmonitor *const win_mon = glfwGetWindowMonitor(self->base);
     if (!win_mon)
