@@ -189,12 +189,12 @@ static void key_callback(GLFWwindow *const window, int const key, [[maybe_unused
 
         break;
     }
-    case GLFW_KEY_I:
-        if (app->img.state >= IMAGE_STATE_UPLOADED)
-        {
-            texture_switch_filter(&app->ren, app->img.texture);
-            app->img.rerender = true;
-        }
+    case GLFW_KEY_F:
+        if (app->img.state < IMAGE_STATE_UPLOADED)
+            break;
+        texture_toggle_filter(&app->ren, app->img.texture);
+        app->img.rerender = true;
+        break;
     default:
         break;
     }

@@ -312,7 +312,7 @@ void texture_destroy(unsigned const texture)
         glDeleteTextures(1, &texture);
 }
 
-void texture_switch_filter(Renderer const *const ren, unsigned const texture)
+void texture_toggle_filter(Renderer const *const ren, unsigned const texture)
 {
     if (!ren->initialized)
         panic("Renderer not initialized");

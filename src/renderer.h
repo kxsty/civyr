@@ -81,7 +81,7 @@ unsigned texture_create(Renderer const *ren, unsigned width, unsigned height, un
                         unsigned char const *pixels);
 void texture_destroy(unsigned texture);
 
-void texture_switch_filter(Renderer const *ren, unsigned texture);
+void texture_toggle_filter(Renderer const *ren, unsigned texture);
 
 #define renderer_assert_initialized(self)                                                                              \
     do                                                                                                                 \
