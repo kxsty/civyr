@@ -249,11 +249,14 @@ static void drop_callback(GLFWwindow *const window, int const path_count, char c
     if (path == app->img.path)
         return;
 
-    if (app->img.path && strcmp(path, app->img.path) == 0)
-        return;
+    if (app->img.path)
+    {
+        if (strcmp(path, app->img.path) == 0)
+            return;
 
-    if (app->img.state < IMAGE_STATE_LOADED)
-        return;
+        if (app->img.state < IMAGE_STATE_LOADED)
+            return;
+    }
 
     Image img;
     image_create(&img, path);
