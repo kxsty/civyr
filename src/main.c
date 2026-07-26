@@ -8,13 +8,8 @@ static char *bind_path(int const argc, char *const argv[])
 {
     if (argc < 2)
         return nullptr;
-    assert(argv[1]);
 
-    char *const path = argv[1];
-    if (path[0] == '\0')
-        return nullptr;
-
-    return path;
+    return argv[1];
 }
 
 int main(int const argc, char *const argv[])
