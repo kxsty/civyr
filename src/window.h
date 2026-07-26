@@ -18,7 +18,7 @@ typedef struct Window
     unsigned height;
 } Window;
 
-bool window_and_renderer_create(Window *self, Renderer *ren, char const *title);
+bool window_and_renderer_create(Window *self, Renderer *ren, char const *title, unsigned width, unsigned height);
 void window_destroy(Window const *self);
 
 void window_transform(Window const *self, int x, int y, unsigned width, unsigned height);

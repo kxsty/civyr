@@ -54,9 +54,6 @@ static bool win32_adapt_dark_mode(GLFWwindow *win)
 #define MIN_WIDTH 160
 #define MIN_HEIGHT 120
 
-#define DEF_WIDTH 800
-#define DEF_HEIGHT 600
-
 static GLFWmonitor *window_best_monitor(Window const *const self)
 {
     window_assert(self);
@@ -269,7 +266,7 @@ static void drop_callback(GLFWwindow *const window, int const path_count, char c
     glfwPostEmptyEvent();
 }
 
-static GLFWwindow *base_window_create(char const *const title)
+static GLFWwindow *base_window_create(char const *const title, unsigned const width, unsigned const height)
 {
     assert(title != nullptr && *title != '\0');
 
@@ -280,7 +277,7 @@ static GLFWwindow *base_window_create(char const *const title)
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
     LOG(LOG_TRACE, "Creating glfw window");
-    GLFWwindow *const self = glfwCreateWindow(DEF_WIDTH, DEF_HEIGHT, title, nullptr, nullptr);
+    GLFWwindow *const self = glfwCreateWindow((int)width, (int)height, title, nullptr, nullptr);
     if (!self)
     {
         char const *err;
@@ -314,30 +311,30 @@ static void base_window_initialize(GLFWwindow *const self)
     glfwSetDropCallback(self, drop_callback);
 }
 
-static bool base_window_and_renderer_create(char const *const title, GLFWwindow **const out_self,
-                                            Renderer *const out_ren)
+static bool base_window_and_renderer_create(GLFWwindow **const self_p, Renderer *const ren, char const *const title,
+                                            unsigned const width, unsigned const height)
 {
     assert(title != nullptr && *title != '\0' && out_self != nullptr && out_ren != nullptr);
 
-    *out_self = base_window_create(title);
-    if (!*out_self)
+    *self_p = base_window_create(title, width, height);
+    if (!*self_p)
         return false;
 
     LOG(LOG_TRACE, "Creating renderer");
-    renderer_create(out_ren, *out_self);
+    renderer_create(ren, *self_p);
 
     LOG(LOG_TRACE, "Rendering background");
-    renderer_draw_color(out_ren, BG_RGBA);
-    renderer_present(out_ren);
-    renderer_draw_color(out_ren, BG_RGBA);
-    renderer_present(out_ren);
+    renderer_draw_color(ren, BG_RGBA);
+    renderer_present(ren);
+    renderer_draw_color(ren, BG_RGBA);
+    renderer_present(ren);
 
     LOG(LOG_TRACE, "Showing window");
-    glfwShowWindow(*out_self);
+    glfwShowWindow(*self_p);
 
-    renderer_init(out_ren);
+    renderer_init(ren);
 
-    base_window_initialize(*out_self);
+    base_window_initialize(*self_p);
 
     return true;
 }
@@ -358,16 +355,17 @@ static void window_create(Window *self, GLFWwindow *const base, unsigned const w
     };
 }
 
-bool window_and_renderer_create(Window *const self, Renderer *const ren, char const *const title)
+bool window_and_renderer_create(Window *const self, Renderer *const ren, char const *const title, unsigned const width,
+                                unsigned const height)
 {
     assert(self != nullptr && ren != nullptr && title != nullptr && *title != '\0');
 
     GLFWwindow *base;
-    bool const res = base_window_and_renderer_create(title, &base, ren);
+    bool const res = base_window_and_renderer_create(&base, ren, title, width, height);
     if (!res)
         return false;
 
-    window_create(self, base, DEF_WIDTH, DEF_HEIGHT);
+    window_create(self, base, width, height);
 
     return true;
 }

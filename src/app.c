@@ -115,7 +115,7 @@ void app_create(App *const self, char const *const argv0, char const *const imag
     }
 
     LOG(LOG_TRACE, "Creating window and renderer");
-    if (!window_and_renderer_create(&self->win, &self->ren, win_title))
+    if (!window_and_renderer_create(&self->win, &self->ren, win_title, 800, 600))
         abort();
 
     glfwSetWindowUserPointer(self->win.base, self);
