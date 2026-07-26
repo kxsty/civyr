@@ -307,10 +307,10 @@ static void base_window_initialize(GLFWwindow *const self)
 
     LOG(LOG_TRACE, "Setting window callbacks");
     glfwSetFramebufferSizeCallback(self, framebuffer_size_callback);
-    glfwSetCursorPosCallback(self, cursor_position_callback);
-    glfwSetMouseButtonCallback(self, mouse_button_callback);
-    glfwSetScrollCallback(self, scroll_callback);
     glfwSetKeyCallback(self, key_callback);
+    glfwSetMouseButtonCallback(self, mouse_button_callback);
+    glfwSetCursorPosCallback(self, cursor_position_callback);
+    glfwSetScrollCallback(self, scroll_callback);
     glfwSetDropCallback(self, drop_callback);
 }
 
