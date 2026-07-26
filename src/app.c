@@ -215,6 +215,18 @@ void app_zoom_image(App *const self, bool const inward)
     self->img.rerender = true;
 }
 
+void app_mirror_image(App *self, bool const mirror_x, bool const mirror_y)
+{
+    app_assert(self);
+
+    if (mirror_x)
+        self->ren.camera.mirror_x = !self->ren.camera.mirror_x;
+    if (mirror_y)
+        self->ren.camera.mirror_y = !self->ren.camera.mirror_y;
+
+    self->img.rerender = true;
+}
+
 void app_move_image(App *const self, double const x_offset, double const y_offset)
 {
     app_assert(self);

@@ -13,6 +13,8 @@ typedef struct Camera
     double x;
     double y;
     double angle;
+    bool mirror_x;
+    bool mirror_y;
 } Camera;
 
 typedef struct Buffers

@@ -132,13 +132,17 @@ static void textures_init(Textures *const self)
     glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, (int *)&self->max_depth);
 }
 
-static void matrix_model(mat4 dest, float const tex_w, float const tex_h, float const angle)
+static void matrix_model(mat4 dest, float const tex_w, float const tex_h, float const angle, bool const mirror_x,
+                         bool const mirror_y)
 {
     glm_mat4_identity(dest);
 
     glm_rotate(dest, glm_rad(angle), (vec3){0.0f, 0.0f, 1.0f});
 
-    glm_scale(dest, (vec3){tex_w, tex_h, 1.0f});
+    float const sx = tex_w * (mirror_x ? -1.0f : 1.0f);
+    float const sy = tex_h * (mirror_y ? -1.0f : 1.0f);
+
+    glm_scale(dest, (vec3){sx, sy, 1.0f});
 }
 
 static void matrix_view(mat4 dest, float const x, float const y)
@@ -161,7 +165,7 @@ static void matrix_mvp(mat4 dest, float const tex_w, float const tex_h, float co
 {
     mat4 model, view, proj, vp;
 
-    matrix_model(model, tex_w, tex_h, (float)cam.angle);
+    matrix_model(model, tex_w, tex_h, (float)cam.angle, cam.mirror_x, cam.mirror_y);
     matrix_view(view, (float)cam.x, (float)cam.y);
     matrix_projection(proj, win_w, win_h, (float)cam.zoom);
 

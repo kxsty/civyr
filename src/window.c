@@ -152,13 +152,21 @@ static void key_callback(GLFWwindow *const window, int const key, [[maybe_unused
 
     switch (key)
     {
-    case GLFW_KEY_UP:
+    case GLFW_KEY_RIGHT:
         if (app->img.state >= IMAGE_STATE_UPLOADED)
             app_rotate_image(app, true);
         break;
-    case GLFW_KEY_DOWN:
+    case GLFW_KEY_LEFT:
         if (app->img.state >= IMAGE_STATE_UPLOADED)
             app_rotate_image(app, false);
+        break;
+    case GLFW_KEY_UP:
+        if (app->img.state >= IMAGE_STATE_UPLOADED)
+            app_mirror_image(app, false, true);
+        break;
+    case GLFW_KEY_DOWN:
+        if (app->img.state >= IMAGE_STATE_UPLOADED)
+            app_mirror_image(app, true, false);
         break;
     case GLFW_KEY_F11: {
         static int prev_x, prev_y, prev_w, prev_h;
