@@ -256,7 +256,7 @@ void renderer_destroy(Renderer const *const self)
     shaders_destroy(&self->shaders);
 }
 
-void renderer_set_viewport([[maybe_unused]] Renderer *const self, int const width, int const height)
+void renderer_set_viewport(Renderer const *const self, unsigned const width, unsigned const height)
 {
     renderer_assert_initialized(self);
     assert(width > 0 && height > 0);

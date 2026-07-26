@@ -14,8 +14,8 @@ typedef struct Window
 {
     Mouse mouse;
     GLFWwindow *base;
-    int width;
-    int height;
+    unsigned width;
+    unsigned height;
 } Window;
 
 bool window_and_renderer_create(Window *self, Renderer *ren, char const *title);

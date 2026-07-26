@@ -50,7 +50,7 @@ struct Renderer
     Shaders shaders;
     Textures textures;
 
-    GLFWwindow *win;
+    GLFWwindow *win; // Borrowed
 
     bool initialized;
 };
@@ -61,7 +61,7 @@ void renderer_create(Renderer *self, GLFWwindow *win);
 void renderer_init(Renderer *self);
 void renderer_destroy(Renderer const *self);
 
-void renderer_set_viewport(Renderer *self, int width, int height);
+void renderer_set_viewport(Renderer const *self, unsigned width, unsigned height);
 
 void renderer_draw_color(Renderer const *self, unsigned char const rgba[4]);
 void renderer_draw_texture(Renderer const *self, unsigned texture, unsigned width, unsigned height, unsigned depth);
