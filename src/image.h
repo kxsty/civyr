@@ -25,8 +25,8 @@ typedef struct AnimatedImage
 {
     int *delays_ms;
     long long next_frame_ms;
-    int count;
-    int curr_frame;
+    unsigned count;
+    unsigned curr_frame;
 } AnimatedImage;
 
 typedef struct SpecificImage
@@ -59,7 +59,7 @@ typedef struct Image
 void image_create(Image *self, char const *path);
 void image_destroy(Image *self);
 
-static int image_frame_count(Image const *self)
+static unsigned image_frame_count(Image const *self)
 {
     if (self->state < IMAGE_STATE_LOADED)
         panic("State mismatch");
@@ -75,7 +75,7 @@ static int image_frame_count(Image const *self)
     }
 }
 
-static int image_curr_frame(Image const *self)
+static unsigned image_curr_frame(Image const *self)
 {
     if (self->state < IMAGE_STATE_LOADED)
         panic("State mismatch");

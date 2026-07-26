@@ -49,7 +49,7 @@ static void static_image_destroy([[maybe_unused]] StaticImage const *const self)
 {
 }
 
-static void animated_image_create(AnimatedImage *const self, int const count, int *const delays_ms)
+static void animated_image_create(AnimatedImage *const self, unsigned const count, int *const delays_ms)
 {
     assert(self != nullptr && count > 0 && delays_ms != nullptr);
 
