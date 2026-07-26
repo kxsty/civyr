@@ -25,9 +25,10 @@ static long long time_since_ms(long long const ms)
 }
 
 #ifdef NDEBUG
-#define LOG(level, fmt, ...) ((void)0)
+#define LOG(level, fmt, ...)                                                                                           \
+    ((level) >= LOG_ERROR ? log_log((level), __FILE__, __LINE__, (fmt), ##__VA_ARGS__) : ((void)0))
 #else
-#define LOG(level, fmt, ...) log_log(level, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
+#define LOG(level, fmt, ...) log_log((level), __FILE__, __LINE__, (fmt), ##__VA_ARGS__)
 #endif
 
 static char const *path_basename(char const *const path)
@@ -58,7 +59,16 @@ static char const *path_basename(char const *const path)
     do                                                                                                                 \
     {                                                                                                                  \
         fprintf(stderr, "Panic: " fmt ", file %s, line %d\n", ##__VA_ARGS__, __FILE__, __LINE__);                      \
+        fflush(stderr);                                                                                                \
         abort();                                                                                                       \
+    } while (0)
+
+#define die(fmt, ...)                                                                                                  \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        fprintf(stderr, "Panic: " fmt ", file %s, line %d\n", ##__VA_ARGS__, __FILE__, __LINE__);                      \
+        fflush(stderr);                                                                                                \
+        exit(1);                                                                                                       \
     } while (0)
 
 #endif // CIVYR_SHARED_H
