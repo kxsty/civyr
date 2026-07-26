@@ -108,48 +108,103 @@ void image_upload(Image *self, Renderer const *ren);
 
 void image_file_get_size(char const *path, int *width, int *height);
 
+#ifdef NDEBUG
+#define static_image_assert(self) (void)(0)
+#else
+#define static_image_assert(self) assert((self) != nullptr);
+#endif
+
+#ifdef NDEBUG
+#define animated_image_assert(self) (void)(0)
+#else
+#define animated_image_assert(self)                                                                                    \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        assert((self) != nullptr);                                                                                     \
+        assert((self)->delays_ms != nullptr);                                                                          \
+    } while (0)
+#endif
+
+#ifdef NDEBUG
+#define specific_image_assert(self) (void)(0)
+#else
+#define specific_image_assert(self)                                                                                    \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        assert((self) != nullptr);                                                                                     \
+        switch ((self)->type)                                                                                          \
+        {                                                                                                              \
+        case IMAGE_TYPE_STATIC:                                                                                        \
+            static_image_assert(&(self)->stat);                                                                        \
+            break;                                                                                                     \
+        case IMAGE_TYPE_ANIMATED:                                                                                      \
+            animated_image_assert(&(self)->anim);                                                                      \
+            break;                                                                                                     \
+        }                                                                                                              \
+    } while (0)
+#endif
+
+#ifdef NDEBUG
+#define image_assert_unloaded(self) (void)(0)
+#else
 #define image_assert_unloaded(self)                                                                                    \
     do                                                                                                                 \
     {                                                                                                                  \
         assert((self) != nullptr);                                                                                     \
         assert((self)->state == IMAGE_STATE_UNLOADED);                                                                 \
+        assert((self)->path == nullptr || *((self)->path) != '\0');                                                    \
         assert((self)->width == 0);                                                                                    \
         assert((self)->height == 0);                                                                                   \
         assert((self)->channels == 0);                                                                                 \
         assert((self)->pixels == nullptr);                                                                             \
+        assert((self)->spec.type == IMAGE_TYPE_STATIC);                                                                \
+        static_image_assert(&(self)->spec.stat);                                                                       \
         assert((self)->texture == 0);                                                                                  \
         assert((self)->recenter == false);                                                                             \
         assert((self)->rerender == false);                                                                             \
     } while (0)
+#endif
 
+#ifdef NDEBUG
+#define image_assert_loaded(self) (void)(0)
+#else
 #define image_assert_loaded(self)                                                                                      \
     do                                                                                                                 \
     {                                                                                                                  \
         assert((self) != nullptr);                                                                                     \
         assert((self)->state == IMAGE_STATE_LOADED);                                                                   \
+        assert((self)->path == nullptr || *((self)->path) != '\0');                                                    \
         assert((self)->width > 0);                                                                                     \
         assert((self)->height > 0);                                                                                    \
         assert((self)->channels > 0);                                                                                  \
         assert((self)->pixels != nullptr);                                                                             \
+        specific_image_assert(&(self)->spec);                                                                          \
         assert((self)->texture == 0);                                                                                  \
         assert((self)->recenter == false);                                                                             \
         assert((self)->rerender == false);                                                                             \
     } while (0)
+#endif
 
+#ifdef NDEBUG
+#define image_assert_uploaded(self) (void)(0)
+#else
 #define image_assert_uploaded(self)                                                                                    \
     do                                                                                                                 \
     {                                                                                                                  \
         assert((self) != nullptr);                                                                                     \
         assert((self)->state == IMAGE_STATE_UPLOADED);                                                                 \
+        assert((self)->path == nullptr || *((self)->path) != '\0');                                                    \
         assert((self)->width > 0);                                                                                     \
         assert((self)->height > 0);                                                                                    \
         assert((self)->channels > 0);                                                                                  \
         assert((self)->pixels == nullptr);                                                                             \
+        specific_image_assert(&(self)->spec);                                                                          \
         assert((self)->texture != 0);                                                                                  \
     } while (0)
+#endif
 
 #ifdef NDEBUG
-#define image_assert(self) ((void)0)
+#define image_assert(self) (void)(0)
 #else
 #define image_assert(self)                                                                                             \
     do                                                                                                                 \

@@ -13,6 +13,7 @@ static void image_unloaded_to_loaded(Image *const self, int const w, int const h
                                      unsigned char *const pixels, SpecificImage const spec)
 {
     image_assert_unloaded(self);
+    assert(pixels != nullptr);
 
     self->width = w;
     self->height = h;
@@ -48,8 +49,10 @@ static void static_image_destroy([[maybe_unused]] StaticImage const *const self)
 {
 }
 
-static AnimatedImage animated_image_create(int const count, int delays[])
+static AnimatedImage animated_image_create(int const count, int *const delays)
 {
+    assert(delays != nullptr);
+
     return (AnimatedImage){
         .count = count,
         .delays_ms = delays,
@@ -58,12 +61,16 @@ static AnimatedImage animated_image_create(int const count, int delays[])
 
 static void animated_image_destroy(AnimatedImage const *const self)
 {
+    animated_image_assert(self);
+
     if (self->delays_ms)
         free(self->delays_ms);
 }
 
 static int bsearch_strcasecmp(void const *const s1, void const *const s2)
 {
+    assert(s1 != nullptr && s2 != nullptr);
+
     char const *const key = *(char const *const *const)s1;
     char const *const element = *(char const *const *const)s2;
     return strcasecmp(key, element);
@@ -71,6 +78,8 @@ static int bsearch_strcasecmp(void const *const s1, void const *const s2)
 
 static ImageType image_file_get_type(char const *const path)
 {
+    assert(path && *path != '\0');
+
     static char const *animation_extensions[] = {"ani", "avif", "gif", "jxl", "webp"};
 
     if (!path)
@@ -93,6 +102,8 @@ static ImageType image_file_get_type(char const *const path)
 
 static void image_to_unloaded(Image *const self)
 {
+    assert(self != nullptr);
+
     if (self->pixels)
     {
         g_free(self->pixels);
@@ -116,8 +127,10 @@ static void image_to_unloaded(Image *const self)
     self->state = IMAGE_STATE_UNLOADED;
 }
 
-static int *get_delays(VipsImage *in, int const frame_count, int *count)
+static int *get_delays(VipsImage *in, int const frame_count, int *const count)
 {
+    assert(in != nullptr && frame_count > 0 && count != nullptr);
+
     // Owned by vips
     int *delays_tmp, delay_count;
     if (vips_image_get_array_int(in, "delay", &delays_tmp, &delay_count) != 0)
@@ -140,6 +153,8 @@ static int *get_delays(VipsImage *in, int const frame_count, int *count)
 
 static VipsImage *vips_image_prepare_internal(char const *const path, ImageType const type)
 {
+    assert(path != nullptr && *path != '\0');
+
     VipsImage *tmp1;
     switch (type)
     {
@@ -229,7 +244,7 @@ void image_create(Image *const self, char const *const path)
 
 void image_destroy(Image *const self)
 {
-    image_assert(self);
+    assert(self != nullptr);
 
     image_to_unloaded(self);
 
@@ -239,9 +254,10 @@ void image_destroy(Image *const self)
 
 bool image_load(Image *const self)
 {
-    unsigned long long const start = time_now_ms();
 
     image_assert_unloaded(self);
+
+    unsigned long long const start = time_now_ms();
 
     ImageType const type = image_file_get_type(self->path);
     VipsImage *v_img = vips_image_prepare_internal(self->path, type);
@@ -318,6 +334,7 @@ void image_load_detached(Image *const self)
 void image_upload(Image *const self, Renderer const *ren)
 {
     image_assert_loaded(self);
+    renderer_assert_initialized(ren);
 
     unsigned long long const start = time_now_ms();
 
@@ -336,6 +353,8 @@ void image_upload(Image *const self, Renderer const *ren)
 
 void image_file_get_size(char const *const path, int *const width, int *const height)
 {
+    assert(path != nullptr && *path != '\0' && width != nullptr && height != nullptr);
+
     VipsImage *const img = vips_image_new_from_file(path, nullptr);
     if (!img)
         panic("Failed to load image: %s", vips_error_buffer());
