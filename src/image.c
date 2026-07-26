@@ -94,39 +94,6 @@ static void image_to_unloaded(Image *const self)
     self->state = IMAGE_STATE_UNLOADED;
 }
 
-static int bsearch_strcasecmp(void const *const s1, void const *const s2)
-{
-    assert(s1 != nullptr && s2 != nullptr);
-
-    char const *const key = *(char const *const *const)s1;
-    char const *const element = *(char const *const *const)s2;
-    return strcasecmp(key, element);
-}
-
-static ImageType image_file_get_type(char const *const path)
-{
-    assert(path && *path != '\0');
-
-    static char const *animation_extensions[] = {"ani", "avif", "gif", "jxl", "webp"};
-
-    if (!path)
-        return false;
-
-    char const *const dot = strrchr(path, '.');
-    if (!dot)
-        return false;
-
-    char const *const ext = dot + 1;
-    if (ext[0] == '\0') // Trailing dot
-        return false;
-
-    bool const is_anim =
-        bsearch(&ext, animation_extensions, sizeof(animation_extensions) / sizeof(animation_extensions[0]),
-                sizeof(char *), bsearch_strcasecmp);
-
-    return is_anim ? IMAGE_TYPE_ANIMATED : IMAGE_TYPE_STATIC;
-}
-
 static int *get_delays(VipsImage *in, unsigned const frame_count, unsigned *const count)
 {
     assert(in != nullptr && frame_count > 0 && count != nullptr);
@@ -151,24 +118,30 @@ static int *get_delays(VipsImage *in, unsigned const frame_count, unsigned *cons
     return delays;
 }
 
-static VipsImage *vips_image_prepare_internal(char const *const path, ImageType const type)
+static VipsImage *vips_image_prepare_internal(char const *const path, ImageType *const type)
 {
-    assert(path != nullptr && *path != '\0');
+    assert(path != nullptr && *path != '\0' && type != nullptr);
 
-    VipsImage *tmp1;
-    switch (type)
-    {
-    case IMAGE_TYPE_STATIC:
-        tmp1 = vips_image_new_from_file(path, nullptr);
-        break;
-    case IMAGE_TYPE_ANIMATED:
-        tmp1 = vips_image_new_from_file(path, "n", -1, nullptr);
-        break;
-    default:
-        panic("Unreachable");
-    }
+    VipsImage *tmp1 = vips_image_new_from_file(path, nullptr);
     if (!tmp1)
         goto err;
+
+    int const count = vips_image_get_n_pages(tmp1);
+    assert(count > 0);
+    if (count == 1)
+    {
+        *type = IMAGE_TYPE_STATIC;
+    }
+    else
+    {
+        g_object_unref(tmp1);
+
+        tmp1 = vips_image_new_from_file(path, "n", -1, nullptr);
+        if (!tmp1)
+            goto err;
+
+        *type = IMAGE_TYPE_ANIMATED;
+    }
 
     VipsImage *tmp2;
     if (vips_colourspace(tmp1, &tmp2, VIPS_INTERPRETATION_sRGB, nullptr) != 0)
@@ -178,6 +151,8 @@ static VipsImage *vips_image_prepare_internal(char const *const path, ImageType 
     if (vips_cast(tmp2, &img, VIPS_FORMAT_UCHAR, nullptr) != 0)
         goto err_tmp2;
 
+    g_object_unref(tmp1);
+    g_object_unref(tmp2);
     return img;
 
 err_tmp2:
@@ -186,6 +161,7 @@ err_tmp1:
     g_object_unref(tmp1);
 err:
     fprintf(stderr, "%s", vips_error_buffer());
+    vips_error_clear();
     return nullptr;
 }
 
@@ -267,8 +243,8 @@ bool image_load(Image *const self)
 
     unsigned long long const start = time_now_ms();
 
-    ImageType const type = image_file_get_type(self->path);
-    VipsImage *v_img = vips_image_prepare_internal(self->path, type);
+    ImageType type;
+    VipsImage *const v_img = vips_image_prepare_internal(self->path, &type);
     if (!v_img)
         goto err;
 
