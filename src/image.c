@@ -233,6 +233,7 @@ static void *image_load_callback(void *const arg)
     if (!image_load(arg))
         panic("Failed to load image");
 
+    glfwPostEmptyEvent();
     return nullptr;
 }
 
