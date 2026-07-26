@@ -40,22 +40,22 @@ static void image_loaded_to_uploaded(Image *const self, unsigned int const textu
     self->state = IMAGE_STATE_UPLOADED;
 }
 
-static StaticImage static_image_create()
+static void static_image_create([[maybe_unused]] StaticImage const *const self)
 {
-    return (StaticImage){};
+    assert(self != nullptr);
 }
 
 static void static_image_destroy([[maybe_unused]] StaticImage const *const self)
 {
 }
 
-static AnimatedImage animated_image_create(int const count, int *const delays)
+static void animated_image_create(AnimatedImage *const self, int const count, int *const delays_ms)
 {
-    assert(delays != nullptr);
+    assert(self != nullptr && count > 0 && delays_ms != nullptr);
 
-    return (AnimatedImage){
+    *self = (AnimatedImage){
         .count = count,
-        .delays_ms = delays,
+        .delays_ms = delays_ms,
     };
 }
 
@@ -274,10 +274,10 @@ bool image_load(Image *const self)
     switch (spec.type)
     {
     case IMAGE_TYPE_STATIC:
-        spec.stat = static_image_create();
+        static_image_create(&spec.stat);
         break;
     case IMAGE_TYPE_ANIMATED:
-        spec.anim = animated_image_create(count, delays);
+        animated_image_create(&spec.anim, count, delays);
         break;
     }
 
