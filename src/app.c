@@ -73,7 +73,7 @@ static void extent_rotate(unsigned *const width, unsigned *const height, double 
 static void app_window_rename(App const *const self)
 {
     app_assert(self);
-    image_assert_loaded(&self->img);
+    assert(self->img.state >= IMAGE_STATE_LOADED);
 
     char title[512];
     snprintf(title, sizeof(title), "%s - %i x %i", path_basename(self->img.path), self->img.width, self->img.height);
