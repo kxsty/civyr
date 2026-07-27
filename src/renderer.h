@@ -6,6 +6,7 @@
 #include <GLFW/glfw3.h>
 
 #include "log.h"
+#include "window.h"
 
 typedef struct Camera
 {
@@ -50,14 +51,16 @@ typedef struct Renderer
     Buffers buffers;
     Textures textures;
 
-    GLFWwindow *win; // Borrowed
+    Window *win; // Borrowed
 
     bool initialized;
 } Renderer;
 
-void renderer_create(Renderer *self, GLFWwindow *win);
+void renderer_create(Renderer *self, Window *win);
 void renderer_init(Renderer *self);
 void renderer_destroy(Renderer const *self);
+
+bool window_and_renderer_create(Window *win, Renderer *ren, char const *title, unsigned width, unsigned height);
 
 void renderer_set_viewport(Renderer const *self, unsigned width, unsigned height);
 

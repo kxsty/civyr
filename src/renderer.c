@@ -3,8 +3,10 @@
 #include <cglm/cglm.h>
 #include <glad/gl.h>
 
+#include "app.h"
 #include "renderer.h"
 #include "utils.h"
+#include "window.h"
 
 static char constexpr vertexShaderSource[] = "#version 330 core\n"
                                              "layout (location = 0) in vec2 a_pos;\n"
@@ -211,11 +213,11 @@ static int texture_channels_to_gl_format(unsigned char const channels)
     }
 }
 
-void renderer_create(Renderer *const self, GLFWwindow *const win)
+void renderer_create(Renderer *const self, Window *const win)
 {
     assert(self != nullptr && win != nullptr);
 
-    glfwMakeContextCurrent(win);
+    glfwMakeContextCurrent(win->base);
     if (!gladLoadGL(glfwGetProcAddress))
         panic("Failed to initialize GLAD");
 
@@ -230,6 +232,32 @@ void renderer_create(Renderer *const self, GLFWwindow *const win)
             },
         .initialized = false,
     };
+}
+
+bool window_and_renderer_create(Window *const win, Renderer *const ren, char const *const title, unsigned const width,
+                                unsigned const height)
+{
+    assert(ren != nullptr && win != nullptr);
+
+    GLFWwindow *base_win;
+    base_window_create(&base_win, title, width, height, false);
+    window_create(win, base_win);
+
+    LOG(LOG_TRACE, "Creating renderer");
+    renderer_create(ren, win);
+
+    LOG(LOG_TRACE, "Rendering background");
+    renderer_draw_color(ren, BG_RGBA);
+    renderer_present(ren);
+
+    LOG(LOG_TRACE, "Showing window");
+    glfwShowWindow(base_win);
+
+    renderer_init(ren);
+
+    base_window_initialize(base_win);
+
+    return true;
 }
 
 void renderer_init(Renderer *const self)
@@ -281,7 +309,7 @@ void renderer_draw_texture(Renderer const *const self, unsigned const texture, u
     glUseProgram(self->shaders.program);
 
     int win_w, win_h;
-    glfwGetFramebufferSize(self->win, &win_w, &win_h);
+    glfwGetFramebufferSize(self->win->base, &win_w, &win_h);
 
     mat4 mvp;
     matrix_mvp(mvp, (float)width, (float)height, (float)win_w, (float)win_h, self->camera);
@@ -299,7 +327,7 @@ void renderer_present(Renderer const *const self)
 {
     renderer_assert(self);
 
-    glfwSwapBuffers(self->win);
+    glfwSwapBuffers(self->win->base);
 }
 
 unsigned texture_create(Renderer const *const ren, unsigned const width, unsigned const height, unsigned const depth,

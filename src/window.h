@@ -1,8 +1,6 @@
 #ifndef CIVYR_WINDOW_H
 #define CIVYR_WINDOW_H
 
-#include "renderer.h"
-
 typedef struct Mouse
 {
     double x;
@@ -18,7 +16,10 @@ typedef struct Window
     unsigned height;
 } Window;
 
-bool window_and_renderer_create(Window *self, Renderer *ren, char const *title, unsigned width, unsigned height);
+void base_window_create(GLFWwindow **self_p, char const *title, unsigned width, unsigned height, bool visible);
+void base_window_initialize(GLFWwindow *self);
+
+void window_create(Window *self, GLFWwindow *base);
 void window_destroy(Window const *self);
 
 void window_transform(Window const *self, int x, int y, unsigned width, unsigned height);
