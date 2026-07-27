@@ -1,5 +1,5 @@
-#ifndef CIVYR_SHARED_H
-#define CIVYR_SHARED_H
+#ifndef CIVYR_UTLIS_H
+#define CIVYR_UTLIS_H
 
 #include <time.h>
 
@@ -71,4 +71,4 @@ static char const *path_basename(char const *const path)
         exit(1);                                                                                                       \
     } while (0)
 
-#endif // CIVYR_SHARED_H
+#endif // CIVYR_UTLIS_H
