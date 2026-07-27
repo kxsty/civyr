@@ -1,6 +1,6 @@
 ## Prerequisites
 
-- **C Compiler** with C23 support
+- **C Compiler** with C23 and pthreads support (GCC / Clang)
 - **CMake** ≥ 4.0
 - **Build system** (Ninja is recommended)
 - **pkg-config**
@@ -13,10 +13,10 @@
 
 ### Installing dependencies
 
-#### Windows (UCRT64, GCC, Ninja)
+#### Windows (UCRT64)
 
 ```bash
-pacman -Syu --noconfirm
+pacman -Syu
 
 pacman -S mingw-w64-ucrt-x86_64-gcc \
           mingw-w64-ucrt-x86_64-ninja \
@@ -32,7 +32,7 @@ pacman -S --asdeps mingw-w64-ucrt-x86_64-libheif \
                    mingw-w64-ucrt-x86_64-graphicsmagick
 ```
 
-#### Ubuntu (Clang)
+#### Ubuntu
 
 ```bash
 sudo apt update && sudo apt upgrade -y
@@ -44,6 +44,10 @@ sudo apt install gcc \
                  imagemagick \
                  graphicsmagick \
                  libglfw3-dev \
+                 libxkbcommon-dev \
+                 libxinerama-dev \
+                 libxcursor-dev \
+                 libxi-dev \
                  python3 \
                  python3-glad
 ```
