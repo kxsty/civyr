@@ -136,17 +136,29 @@ static void key_callback(GLFWwindow *const window, int const key, [[maybe_unused
 
     switch (key)
     {
-    case GLFW_KEY_RIGHT:
-        app_rotate_image(app, true);
-        break;
     case GLFW_KEY_LEFT:
         app_rotate_image(app, false);
+        break;
+    case GLFW_KEY_RIGHT:
+        app_rotate_image(app, true);
         break;
     case GLFW_KEY_UP:
         app_mirror_image(app, false, true);
         break;
     case GLFW_KEY_DOWN:
         app_mirror_image(app, true, false);
+        break;
+    case GLFW_KEY_F11:
+        window_toggle_fullscreen(&app->win);
+        app->img.rerender = true;
+        break;
+    case GLFW_KEY_1:
+        app->ren.camera.zoom = 1;
+        app->img.rerender = true;
+        break;
+    case GLFW_KEY_F:
+        texture_toggle_filter(&app->ren, app->img.texture);
+        app->img.rerender = true;
         break;
     case GLFW_KEY_W:
         app_pan_image(app, 0, 10);
@@ -159,14 +171,6 @@ static void key_callback(GLFWwindow *const window, int const key, [[maybe_unused
         break;
     case GLFW_KEY_D:
         app_pan_image(app, -10, 0);
-        break;
-    case GLFW_KEY_F11:
-        window_toggle_fullscreen(&app->win);
-        app->img.rerender = true;
-        break;
-    case GLFW_KEY_F:
-        texture_toggle_filter(&app->ren, app->img.texture);
-        app->img.rerender = true;
         break;
     default:
         break;
