@@ -32,4 +32,4 @@ See [BUILD.md](BUILD.md)
 
 # Screenshoots
 
-<img width="1163" height="806" alt="{E6C1B2C6-31BC-47A6-8DF8-2B48D2250526}" src="https://github.com/user-attachments/assets/94cbd92e-71a3-4977-ba6d-9483541d06c3" />
+<img width="1163" height="806" alt="Screenshoot" src="https://github.com/user-attachments/assets/15398acc-bb4f-4636-b868-d4b777f95515" />
