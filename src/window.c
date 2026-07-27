@@ -1,6 +1,8 @@
 #include <assert.h>
+#include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -9,13 +11,12 @@
 #include "app.h"
 #include "utils.h"
 
-#include <float.h>
-
 #ifdef _WIN32
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #include <dwmapi.h>
+#include <windows.h>
 
 #ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 20
@@ -54,6 +55,9 @@ static bool win32_adapt_dark_mode(GLFWwindow *win)
 #define MIN_WIDTH 160
 #define MIN_HEIGHT 120
 
+#define max(a, b) (((a) > (b)) ? (a) : (b))
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+
 static GLFWmonitor *window_best_monitor(Window const *const self)
 {
     window_assert(self);
@@ -75,8 +79,8 @@ static GLFWmonitor *window_best_monitor(Window const *const self)
 
         GLFWvidmode const *const mode = glfwGetVideoMode(mons[i]);
 
-        int const overlap = __max(0, __min(wx + ww, mx + mode->width) - __max(wx, mx)) *
-                            __max(0, __min(wr + wh, my + mode->height) - __max(wr, my));
+        int const overlap = max(0, min(wx + ww, mx + mode->width) - max(wx, mx)) *
+                            max(0, min(wr + wh, my + mode->height) - max(wr, my));
 
         if (overlap > best_overlap)
         {
