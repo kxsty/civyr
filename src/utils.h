@@ -3,25 +3,19 @@
 
 #include <time.h>
 
-#define MSEC_PER_SEC 1000LL
+#define MSEC_PER_SEC 1000
 #define NSEC_PER_MSEC 1000000LL
 #define NSEC_PER_SEC 1000000000LL
 
-static long long time_now_ms()
-{
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return ts.tv_sec * MSEC_PER_SEC + ts.tv_nsec / NSEC_PER_MSEC;
-}
 static long long time_now_ns()
 {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return ts.tv_sec * NSEC_PER_SEC + ts.tv_nsec;
 }
-static long long time_since_ms(long long const ms)
+static long long time_since_ns(long long const since_ns)
 {
-    return time_now_ms() - ms;
+    return time_now_ns() - since_ns;
 }
 
 #ifdef NDEBUG
@@ -68,7 +62,7 @@ static char const *path_basename(char const *const path)
     {                                                                                                                  \
         fprintf(stderr, "Panic: " fmt ", file %s, line %d\n", ##__VA_ARGS__, __FILE__, __LINE__);                      \
         fflush(stderr);                                                                                                \
-        exit(1);                                                                                                       \
+        exit(EXIT_FAILURE);                                                                                            \
     } while (0)
 
 #endif // CIVYR_UTLIS_H

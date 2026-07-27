@@ -128,7 +128,8 @@ static VipsImage *vips_image_prepare_internal(char const *const path, ImageType 
 
     int const count = vips_image_get_n_pages(tmp1);
     assert(count > 0);
-    if (count == 1)
+    bool const have_delays = vips_image_get_array_int(tmp1, "delay", nullptr, nullptr) == 0;
+    if (count == 1 || have_delays)
     {
         *type = IMAGE_TYPE_STATIC;
     }
@@ -175,7 +176,10 @@ static bool vips_image_get_fields_internal(VipsImage *const img, ImageType const
     size_t size;
     *pixels = vips_image_write_to_memory(img, &size);
     if (!*pixels)
-        goto err;
+    {
+        LOG(LOG_ERROR, "Failed to load image pixel data");
+        return false;
+    }
 
     *width = vips_image_get_width(img);
     *height = vips_image_get_page_height(img);
@@ -190,18 +194,16 @@ static bool vips_image_get_fields_internal(VipsImage *const img, ImageType const
         *count = vips_image_get_n_pages(img);
         *delays = get_delays(img, *count, count);
         if (!*delays)
-            goto err_pixels;
+        {
+            g_free(*pixels);
+            LOG(LOG_ERROR, "Failed to load image metadata");
+            return false;
+        }
         break;
     }
 
     assert((size_t)*count * (size_t)*width * (size_t)*height * (size_t)*channels == size);
     return true;
-
-err_pixels:
-    g_free(*pixels);
-err:
-    LOG(LOG_ERROR, "Failed to get image fields");
-    return false;
 }
 
 static void *image_load_callback(void *const arg)
@@ -239,6 +241,9 @@ void image_destroy(Image *const self)
 
 bool image_load(Image *const self)
 {
+#ifndef NDEBUG
+    long long const start_ns = time_now_ns();
+#endif
     image_assert_unloaded(self);
 
     unsigned long long const start = time_now_ms();
@@ -270,7 +275,11 @@ bool image_load(Image *const self)
     image_unloaded_to_loaded(self, w, h, channels, spec, pixels);
 
     g_object_unref(v_img);
-    LOG(LOG_INFO, "Loaded image \"%s\" in %llds", path_basename(self->path), time_since_ms(start));
+
+#ifndef NDEBUG
+    long long const end_ns = time_since_ns(start_ns);
+    LOG(LOG_INFO, "Loaded image \"%s\" in %fs", path_basename(self->path), (double)end_ns / NSEC_PER_SEC);
+#endif
     return true;
 
 err_v_img:
@@ -310,6 +319,9 @@ void image_load_detached(Image *const self)
 
 void image_upload(Image *const self, Renderer const *ren)
 {
+#ifndef NDEBUG
+    long long const start_ns = time_now_ns();
+#endif
     image_assert_loaded(self);
     renderer_assert_initialized(ren);
 
@@ -325,7 +337,10 @@ void image_upload(Image *const self, Renderer const *ren)
 
     image_loaded_to_uploaded(self, texture);
 
-    LOG(LOG_INFO, "Uploaded image in %lldms", time_since_ms(start));
+#ifndef NDEBUG
+    long long const end_ns = time_since_ns(start_ns);
+    LOG(LOG_INFO, "Uploaded image in %fs", (double)end_ns / NSEC_PER_SEC);
+#endif
 }
 
 void image_file_get_size(char const *const path, unsigned *const width, unsigned *const height)

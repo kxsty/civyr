@@ -46,11 +46,11 @@ int main(int const argc, char *const argv[])
             continue;
         }
 
-        long long const now_ms = time_now_ms();
+        long long const now_ms = time_now_ns() / NSEC_PER_MSEC;
 
         double timeout = 0;
         if (image_next_frame_ns(&app.img) > now_ms)
-            timeout = (double)(image_next_frame_ns(&app.img) - now_ms) / 1000.0;
+            timeout = (double)(image_next_frame_ns(&app.img) - now_ms) / MSEC_PER_SEC;
 
         app.img.rerender = true;
         glfwWaitEventsTimeout(timeout);

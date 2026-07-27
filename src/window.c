@@ -318,7 +318,7 @@ static void base_window_initialize(GLFWwindow *const self)
 static bool base_window_and_renderer_create(GLFWwindow **const self_p, Renderer *const ren, char const *const title,
                                             unsigned const width, unsigned const height)
 {
-    assert(title != nullptr && *title != '\0' && out_self != nullptr && out_ren != nullptr);
+    assert(title != nullptr && *title != '\0' && self_p != nullptr && ren != nullptr);
 
     *self_p = base_window_create(title, width, height);
     if (!*self_p)
@@ -386,7 +386,8 @@ void window_transform(Window const *self, int const x, int const y, unsigned con
     window_assert(self);
 
     glfwSetWindowPos(self->base, x, y);
-    glfwSetWindowSize(self->base, (int)width, (int)height);
+    if (self->width != width || self->height != height)
+        glfwSetWindowSize(self->base, (int)width, (int)height);
 }
 
 void window_workarea(Window const *self, int *const x, int *const y, unsigned *const width, unsigned *const height)

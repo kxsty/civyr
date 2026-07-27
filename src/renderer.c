@@ -306,9 +306,7 @@ unsigned texture_create(Renderer const *const ren, unsigned const width, unsigne
                         unsigned char const channels, unsigned char const *const pixels)
 {
     renderer_assert_initialized(ren);
-
-    if (width < 1 || height < 1)
-        panic("Texture size too small: %d x %d", width, height);
+    assert(width > 0 && height > 0);
 
     if (width > ren->textures.max_size || height > ren->textures.max_size)
         panic("Texture size too large: %d x %d", width, height);
@@ -316,7 +314,7 @@ unsigned texture_create(Renderer const *const ren, unsigned const width, unsigne
     if (depth > ren->textures.max_depth)
         panic("Texture depth too large: %d", depth);
 
-    unsigned int texture;
+    unsigned texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
 

@@ -32,7 +32,7 @@ static void update_animation(AnimatedImage *const anim)
 {
     assert(anim != nullptr);
 
-    long long const now_ms = time_now_ms();
+    long long const now_ms = time_now_ns() / NSEC_PER_MSEC;
 
     if (anim->next_frame_ms == 0)
         anim->next_frame_ms = now_ms + anim->delays_ms[0];
@@ -83,7 +83,7 @@ static void app_window_rename(App const *const self)
 
 void app_create(App *const self, char const *const argv0, char const *const image_path)
 {
-    assert(self != nullptr);
+    assert(self != nullptr && (image_path == nullptr || *image_path != '\0'));
 
     LOG(LOG_TRACE, "Inititalizing vips");
     if (VIPS_INIT(argv0) != 0)
