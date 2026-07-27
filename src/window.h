@@ -16,8 +16,8 @@ typedef struct Window
     unsigned height;
 } Window;
 
-void base_window_create(GLFWwindow **self_p, char const *title, unsigned width, unsigned height, bool visible);
-void base_window_initialize(GLFWwindow *self);
+bool base_window_create(GLFWwindow **self_p, char const *title, unsigned width, unsigned height, bool visible);
+void base_window_init(GLFWwindow *self);
 
 void window_create(Window *self, GLFWwindow *base);
 void window_destroy(Window const *self);

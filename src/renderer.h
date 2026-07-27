@@ -53,7 +53,7 @@ typedef struct Renderer
 
     Window *win; // Borrowed
 
-    bool initialized;
+    bool inited;
 } Renderer;
 
 void renderer_create(Renderer *self, Window *win);
@@ -85,9 +85,9 @@ void texture_destroy(unsigned texture);
 void texture_toggle_filter(Renderer const *ren, unsigned texture);
 
 #ifdef NDEBUG
-#define renderer_assert_initialized(self) (void)(0)
+#define renderer_assert_inited(self) (void)(0)
 #else
-#define renderer_assert_initialized(self)                                                                              \
+#define renderer_assert_inited(self)                                                                                   \
     do                                                                                                                 \
     {                                                                                                                  \
         assert((self) != nullptr);                                                                                     \
@@ -102,14 +102,14 @@ void texture_toggle_filter(Renderer const *ren, unsigned texture);
         assert((self)->buffers.EBO != 0);                                                                              \
         assert((self)->textures.max_size != 0);                                                                        \
         assert((self)->textures.max_depth != 0);                                                                       \
-        assert((self)->initialized == true);                                                                           \
+        assert((self)->inited == true);                                                                                \
     } while (0)
 #endif
 
 #ifdef NDEBUG
-#define renderer_assert_uninitialized(self) (void)(0)
+#define renderer_assert_uninited(self) (void)(0)
 #else
-#define renderer_assert_uninitialized(self)                                                                            \
+#define renderer_assert_uninited(self)                                                                                 \
     do                                                                                                                 \
     {                                                                                                                  \
         assert((self) != nullptr);                                                                                     \
@@ -122,7 +122,7 @@ void texture_toggle_filter(Renderer const *ren, unsigned texture);
         assert((self)->buffers.EBO == 0);                                                                              \
         assert((self)->textures.max_size == 0);                                                                        \
         assert((self)->textures.max_depth == 0);                                                                       \
-        assert((self)->initialized == false);                                                                          \
+        assert((self)->inited == false);                                                                               \
     } while (0)
 #endif
 
@@ -132,10 +132,10 @@ void texture_toggle_filter(Renderer const *ren, unsigned texture);
 #define renderer_assert(self)                                                                                          \
     do                                                                                                                 \
     {                                                                                                                  \
-        if ((self)->initialized)                                                                                       \
-            renderer_assert_initialized(self);                                                                         \
+        if ((self)->inited)                                                                                            \
+            renderer_assert_inited(self);                                                                              \
         else                                                                                                           \
-            renderer_assert_uninitialized(self);                                                                       \
+            renderer_assert_uninited(self);                                                                            \
     } while (0)
 #endif
 

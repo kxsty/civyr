@@ -230,17 +230,43 @@ void renderer_create(Renderer *const self, Window *const win)
                 .y = 0,
                 .angle = 0,
             },
-        .initialized = false,
+        .inited = false,
     };
+}
+
+void renderer_init(Renderer *const self)
+{
+    renderer_assert_uninited(self);
+
+    shaders_init(&self->shaders);
+
+    buffers_init(&self->buffers);
+
+    textures_init(&self->textures);
+
+    self->inited = true;
+}
+
+void renderer_destroy(Renderer const *const self)
+{
+    assert(self != nullptr);
+
+    if (!self->inited)
+        return;
+
+    buffers_destroy(&self->buffers);
+    shaders_destroy(&self->shaders);
 }
 
 bool window_and_renderer_create(Window *const win, Renderer *const ren, char const *const title, unsigned const width,
                                 unsigned const height)
 {
-    assert(ren != nullptr && win != nullptr);
+    assert(ren != nullptr && win != nullptr && title != nullptr && *title != '\0' && width > 0 && height > 0);
 
     GLFWwindow *base_win;
-    base_window_create(&base_win, title, width, height, false);
+    if (!base_window_create(&base_win, title, width, height, false))
+        return false;
+
     window_create(win, base_win);
 
     LOG(LOG_TRACE, "Creating renderer");
@@ -255,38 +281,14 @@ bool window_and_renderer_create(Window *const win, Renderer *const ren, char con
 
     renderer_init(ren);
 
-    base_window_initialize(base_win);
+    base_window_init(base_win);
 
     return true;
 }
 
-void renderer_init(Renderer *const self)
-{
-    renderer_assert_uninitialized(self);
-
-    shaders_init(&self->shaders);
-
-    buffers_init(&self->buffers);
-
-    textures_init(&self->textures);
-
-    self->initialized = true;
-}
-
-void renderer_destroy(Renderer const *const self)
-{
-    assert(self != nullptr);
-
-    if (!self->initialized)
-        return;
-
-    buffers_destroy(&self->buffers);
-    shaders_destroy(&self->shaders);
-}
-
 void renderer_set_viewport(Renderer const *const self, unsigned const width, unsigned const height)
 {
-    renderer_assert_initialized(self);
+    renderer_assert_inited(self);
     assert(width > 0 && height > 0);
 
     glViewport(0, 0, (int)width, (int)height);
@@ -303,7 +305,7 @@ void renderer_draw_color(Renderer const *const self, unsigned char const rgba[4]
 void renderer_draw_texture(Renderer const *const self, unsigned const texture, unsigned const width,
                            unsigned const height, unsigned const depth)
 {
-    renderer_assert_initialized(self);
+    renderer_assert_inited(self);
     assert(texture > 0 && width > 0 && height > 0);
 
     glUseProgram(self->shaders.program);
@@ -330,7 +332,7 @@ void renderer_present(Renderer const *const self)
 unsigned texture_create(Renderer const *const ren, unsigned const width, unsigned const height, unsigned const depth,
                         unsigned char const channels, unsigned char const *const pixels)
 {
-    renderer_assert_initialized(ren);
+    renderer_assert_inited(ren);
     assert(width > 0 && height > 0);
 
     if (width > ren->textures.max_size || height > ren->textures.max_size)
@@ -369,7 +371,7 @@ void texture_destroy(unsigned const texture)
 
 void texture_toggle_filter(Renderer const *const ren, unsigned const texture)
 {
-    renderer_assert_initialized(ren);
+    renderer_assert_inited(ren);
     assert(texture != 0);
 
     glBindTexture(GL_TEXTURE_2D_ARRAY, texture);

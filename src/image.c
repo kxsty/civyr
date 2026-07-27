@@ -323,9 +323,7 @@ void image_upload(Image *const self, Renderer const *ren)
     long long const start_ns = time_now_ns();
 #endif
     image_assert_loaded(self);
-    renderer_assert_initialized(ren);
-
-    unsigned long long const start = time_now_ms();
+    renderer_assert_inited(ren);
 
     if (self->state == IMAGE_STATE_UPLOADED)
         return;

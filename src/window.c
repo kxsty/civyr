@@ -38,7 +38,7 @@ static bool win32_is_dark_mode()
     return value == 0;
 }
 
-static bool win32_adapt_dark_mode(GLFWwindow *win)
+static bool win32_setup_theme(GLFWwindow *const win)
 {
     if (!win32_is_dark_mode())
         return true;
@@ -274,7 +274,7 @@ static void drop_callback(GLFWwindow *const window, int const path_count, char c
     glfwPostEmptyEvent();
 }
 
-void base_window_create(GLFWwindow **self_p, char const *const title, unsigned const width, unsigned const height,
+bool base_window_create(GLFWwindow **self_p, char const *const title, unsigned const width, unsigned const height,
                         bool const visible)
 {
     assert(title != nullptr && *title != '\0' && width > 0 && height > 0);
@@ -292,24 +292,31 @@ void base_window_create(GLFWwindow **self_p, char const *const title, unsigned c
     {
         char const *err;
         glfwGetError(&err);
-        panic("Failed to create glfw window: %s", err);
+        fprintf(stderr, "Failed to create glfw window: %s", err);
+        return false;
     }
 
 #ifdef _WIN32
     LOG(LOG_TRACE, "Adapting dark mode for the window");
-    win32_adapt_dark_mode(*self_p);
+    if (!win32_setup_theme(*self_p))
+    {
+        fprintf(stderr, "Failed to setup theme for the window");
+        return false;
+    }
 #endif
+
+    return true;
 }
 
-void base_window_initialize(GLFWwindow *const self)
+void base_window_init(GLFWwindow *const self)
 {
     assert(self != nullptr);
 
-    LOG(LOG_TRACE, "Setting window limits");
+    LOG(LOG_TRACE, "Setting glfw window limits");
     glfwSetWindowSizeLimits(self, 160, 120, GLFW_DONT_CARE, GLFW_DONT_CARE);
     glfwSwapInterval(1);
 
-    LOG(LOG_TRACE, "Setting window callbacks");
+    LOG(LOG_TRACE, "Setting glfw window callbacks");
     glfwSetFramebufferSizeCallback(self, framebuffer_size_callback);
     glfwSetKeyCallback(self, key_callback);
     glfwSetMouseButtonCallback(self, mouse_button_callback);

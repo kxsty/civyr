@@ -2,7 +2,7 @@
 
 # civyr
 
-Minimal and fast image viewer written in c.
+Fast and minimal image viewer written in c.
 
 Supports a wide range of image formats through the libvips and ImageMagick libraries.
 
