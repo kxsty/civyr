@@ -308,11 +308,8 @@ void renderer_draw_texture(Renderer const *const self, unsigned const texture, u
 
     glUseProgram(self->shaders.program);
 
-    int win_w, win_h;
-    glfwGetFramebufferSize(self->win->base, &win_w, &win_h);
-
     mat4 mvp;
-    matrix_mvp(mvp, (float)width, (float)height, (float)win_w, (float)win_h, self->camera);
+    matrix_mvp(mvp, (float)width, (float)height, (float)self->win->width, (float)self->win->height, self->camera);
 
     glUniformMatrix4fv(self->shaders.uniforms.mvp, 1, GL_FALSE, (float *)mvp);
     glUniform1f(self->shaders.uniforms.depth, (float)depth);
