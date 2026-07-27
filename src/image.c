@@ -128,8 +128,8 @@ static VipsImage *vips_image_prepare_internal(char const *const path, ImageType 
 
     int const count = vips_image_get_n_pages(tmp1);
     assert(count > 0);
-    bool const have_delays = vips_image_get_array_int(tmp1, "delay", nullptr, nullptr) == 0;
-    if (count == 1 || have_delays)
+    bool const have_delays = vips_image_get_typeof(tmp1, "delay");
+    if (count == 1 || !have_delays)
     {
         *type = IMAGE_TYPE_STATIC;
     }
