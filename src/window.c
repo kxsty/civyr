@@ -236,7 +236,7 @@ static void scroll_callback(GLFWwindow *const window, [[maybe_unused]] double co
     if (app->win.mouse.x == DBL_MIN && app->win.mouse.y == DBL_MIN)
         glfwGetCursorPos(window, &app->win.mouse.x, &app->win.mouse.y);
 
-    app_zoom_image(app, yoffset > 0);
+    app_zoom_image(app, yoffset > 0, true);
 }
 
 static void drop_callback(GLFWwindow *const window, int const path_count, char const **const paths)

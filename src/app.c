@@ -176,7 +176,7 @@ void app_render_image(App *const self)
     self->img.rerender = false;
 }
 
-void app_zoom_image(App *const self, bool const inward)
+void app_zoom_image(App *const self, bool const inward, bool const to_cursor)
 {
     app_assert(self);
     image_assert_uploaded(&self->img);
@@ -189,6 +189,15 @@ void app_zoom_image(App *const self, bool const inward)
     zoom = fmin(zoom, scale * 1000);
     if (zoom == self->ren.camera.zoom)
         return;
+
+    if (!to_cursor)
+    {
+        self->ren.camera.zoom = zoom;
+
+        self->img.rerender = true;
+        app_rename_uploaded(self);
+        return;
+    }
 
     double const mouse_math_x = self->win.mouse.x - self->win.width / 2.0;
     double const mouse_math_y = self->win.mouse.y - self->win.height / 2.0;
