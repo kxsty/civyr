@@ -246,8 +246,6 @@ bool image_load(Image *const self)
 #endif
     image_assert_unloaded(self);
 
-    unsigned long long const start = time_now_ms();
-
     ImageType type;
     VipsImage *const v_img = vips_image_prepare_internal(self->path, &type);
     if (!v_img)
