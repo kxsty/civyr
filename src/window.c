@@ -152,6 +152,12 @@ static void key_callback(GLFWwindow *const window, int const key, [[maybe_unused
         window_toggle_fullscreen(&app->win);
         app->img.rerender = true;
         break;
+    case GLFW_KEY_MINUS:
+        app_zoom_image(app, false, false);
+        break;
+    case GLFW_KEY_EQUAL:
+        app_zoom_image(app, true, false);
+        break;
     case GLFW_KEY_1:
         app->ren.camera.zoom = 1;
         app->img.rerender = true;
