@@ -65,4 +65,24 @@ static char const *path_basename(char const *const path)
         exit(EXIT_FAILURE);                                                                                            \
     } while (0)
 
+#define rassert(expr)                                                                                                  \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        if (!(expr))                                                                                                   \
+        {                                                                                                              \
+            fprintf(stderr,                                                                                            \
+                    "Assertion failed: %s\n"                                                                           \
+                    "File: %s\n"                                                                                       \
+                    "Line: %d\n",                                                                                      \
+                    #expr, __FILE__, __LINE__);                                                                        \
+            abort();                                                                                                   \
+        }                                                                                                              \
+    } while (0)
+
+#ifndef NDEBUG
+#define dassert(expr) rassert(expr)
+#else
+#define dassert(expr) ((void)0)
+#endif
+
 #endif // CIVYR_UTLIS_H
