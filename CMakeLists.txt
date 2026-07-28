@@ -82,7 +82,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glfw glad cglm log_c_root)
 
-include(${glad_SOURCE_DIR}/cmake/GLADconfig.cmake)
+include(${glad_SOURCE_DIR}/cmake/GladConfig.cmake)
 glad_add_library(glad_gl_core_33 STATIC REPRODUCIBLE API gl:core=3.3 EXTENSIONS NONE)
 
 add_library(log_c STATIC ${log_c_root_SOURCE_DIR}/src/log.c)
